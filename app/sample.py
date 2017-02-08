@@ -63,9 +63,9 @@ def redirect_v():
 @app.route("/products", methods=['GET', 'POST'])
 def products():
     form = ProductForm()
-    form.product_category_id.data = 1
+    category = ProductCategory.query.get_or_404(request.args.get('category'))
     if form.validate_on_submit():
-        product_category = ProductCategory.query.get_or_404(form.product_category_id.data)
+        product_category = ProductCategory.query.get_or_404(request.form.get("category_id"))
         upload_files = request.files.getlist('image_links[]')
         filenames = []
         for file in upload_files:
@@ -77,6 +77,7 @@ def products():
                     new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + parts[1])
                 filename = (uploaded_images.save(file, name=new_filename))
                 filenames.append(filename)
+        selected_options = request.form.getlist("sku_options")
         product = Product(
             name=form.name.data,
             code=form.code.data,
@@ -84,11 +85,14 @@ def products():
             product_category=product_category,
             product_image_links=filenames
         )
+        for option_id in selected_options:
+            sku_option = SkuOption.query.get_or_404(option_id)
+            product.sku_options.append(sku_option)
         db.session.add(product)
         db.session.commit()
         flash("产品创建成功")
-        return redirect(url_for("products"))
-    return render_template("products.html", form=form)
+        return redirect(url_for("products")+"?category=%d" % category.id)
+    return render_template("products.html", form=form, category=category)
 
 
 # --- CKEditor file upload ---
@@ -118,7 +122,7 @@ def ckupload():
             error = 'ERROR_DIR_NOT_WRITEABLE'
         if not error:
             fileobj.save(filepath)
-            url = url_for('static', filename = '%s/%s' % ('upload/ckupload', rnd_name))
+            url = url_for('static', filename='%s/%s' % ('upload/ckupload', rnd_name))
     else:
         error = 'post error'
     res = """
@@ -161,7 +165,6 @@ class SkuOptionForm(FlaskForm):
 
 
 class ProductForm(FlaskForm, CKEditor):
-    product_category_id = HiddenField(validators=[DataRequired()])
     name = StringField('产品名称', validators=[DataRequired()])
     code = StringField('产品代码')
     description = TextAreaField('产品描述')
@@ -239,7 +242,7 @@ class ProductSku(db.Model):
     barcode = db.Column(db.String)
     hscode = db.Column(db.String)
     weight = db.Column(db.Float)
-    thumbnail = db.Column(db.String(256))
+    thumbnail = db.Column(db.Text)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
 

@@ -8,13 +8,22 @@
     <form class="form form-horizontal" method="post" role="form" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         {{ wtf.form_errors(form, hiddens="only") }}
-        {{ wtf.form_field(form.product_category_id) }}
+        <input type="hidden" name="category_id" value="{{ category.id }}" />
         {{ wtf.form_field(form.name) }}
         {{ wtf.form_field(form.code) }}
         <div class="form-group">
             <label class="control-label" for="image_links">产品图片</label>
             <input type="file" multiple="" name="image_links[]" class="form-control" />
         </div>
+        {% for sku_feature in category.sku_features %}
+        <div class="form-group">
+            <label class="control-label" for="sku_feature">{{ sku_feature.name }}：</label>
+            {% for sku_option in  sku_feature.sku_options %}
+                <input type="checkbox" name="sku_options" id="id_{{ sku_option.id }}" value="{{ sku_option.id }}" />
+                {{ sku_option.name }}
+            {% endfor %}
+        </div>
+        {% endfor %}
         {{ wtf.form_field(form.description, class='ckeditor') }}
         <script type="text/javascript">
 	    CKEDITOR.replace(
