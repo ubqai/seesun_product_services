@@ -2,7 +2,6 @@ from flask import Flask, make_response, redirect, render_template, url_for, flas
 from flask_script import Manager
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
-from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, HiddenField, TextAreaField
 from wtforms.validators import DataRequired
@@ -10,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskckeditor import CKEditor
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from werkzeug.utils import secure_filename
+from os import path
 import os
 import datetime
 import random
@@ -21,6 +21,7 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['UPLOADED_IMAGES_DEST'] = 'static/images/products'
 app.config['UPLOADED_IMAGES_URL'] = '/static/images/products'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 uploaded_images = UploadSet('images', IMAGES)
 configure_uploads(app, uploaded_images)
 app.config['ALLOWED_EXTENSIONS'] = set(['jpg', 'png', 'gif'])
@@ -39,7 +40,7 @@ def index():
         db.session.add(pc)
         flash('创建成功!')
         return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.utcnow(), form=form, pcs=pcs )
+    return render_template('index.html', current_time=datetime.datetime.utcnow(), form=form, pcs=pcs)
 
 
 @app.route("/user/<name>")
@@ -66,12 +67,15 @@ def products():
     if form.validate_on_submit():
         product_category = ProductCategory.query.get_or_404(form.product_category_id.data)
         upload_files = request.files.getlist('image_links[]')
-        if len(upload_files) < 1:
-            flash("必须上传图片")
         filenames = []
         for file in upload_files:
             if file and allowed_file(file.filename):
-                filename = (uploaded_images.save(file, name=secure_filename(file.filename)))
+                try:
+                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + file.filename)
+                except:
+                    parts = path.splitext(file.filename)
+                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + parts[1])
+                filename = (uploaded_images.save(file, name=new_filename))
                 filenames.append(filename)
         product = Product(
             name=form.name.data,
