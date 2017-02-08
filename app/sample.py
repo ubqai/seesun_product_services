@@ -1,4 +1,4 @@
-from flask import Flask, make_response, redirect, render_template, url_for, flash
+from flask import Flask, make_response, redirect, render_template, url_for, flash, request
 from flask_script import Manager
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
@@ -8,6 +8,7 @@ from wtforms import StringField, SubmitField, HiddenField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flaskckeditor import CKEditor
+import os, datetime, random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -54,10 +55,12 @@ def products():
     form = ProductForm()
     form.product_category_id.data = 1
     if form.validate_on_submit():
+        product_category = ProductCategory.query.get_or_404(form.product_category_id.data)
         product = Product(
             name=form.name.data,
             code=form.code.data,
-            description=form.description.data
+            description=form.description.data,
+            product_category=product_category
         )
         db.session.add(product)
         db.session.commit()
@@ -66,11 +69,45 @@ def products():
     return render_template("products.html", form=form)
 
 
-@app.route('/ckupload')
+# --- CKEditor file upload ---
+def gen_rnd_filename():
+    filename_prefix = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    return '%s%s' % (filename_prefix, str(random.randrange(1000, 10000)))
+
+
+@app.route('/ckupload/', methods=['POST'])
 def ckupload():
-    form = ProductForm()
-    response = form.upload(endpoint=app)
+    error = ''
+    url = ''
+    callback = request.args.get('CKEditorFuncNum')
+    if request.method == 'POST' and 'upload' in request.files:
+        fileobj = request.files['upload']
+        fname, fext = os.path.splitext(fileobj.filename)
+        rnd_name = '%s%s' % (gen_rnd_filename(), fext)
+        filepath = os.path.join(app.static_folder, 'upload/ckupload', rnd_name)
+        # check file path exists or not
+        dirname = os.path.dirname(filepath)
+        if not os.path.exists(dirname):
+            try:
+                os.makedirs(dirname)
+            except:
+                error = 'ERROR_CREATE_DIR'
+        elif not os.access(dirname, os.W_OK):
+            error = 'ERROR_DIR_NOT_WRITEABLE'
+        if not error:
+            fileobj.save(filepath)
+            url = url_for('static', filename = '%s/%s' % ('upload/ckupload', rnd_name))
+    else:
+        error = 'post error'
+    res = """
+    <script type="text/javascript">
+        window.parent.CKEDITOR.tools.callFunction(%s, '%s', '%s');
+    </script>
+    """ % (callback, url, error)
+    response = make_response(res)
+    response.headers['Content-Type'] = 'text/html'
     return response
+
 
 @app.errorhandler(404)
 def page_not_found(e):
