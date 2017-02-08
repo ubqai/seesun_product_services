@@ -8,13 +8,22 @@ from wtforms import StringField, SubmitField, HiddenField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flaskckeditor import CKEditor
-import os, datetime, random
+from flask_uploads import UploadSet, IMAGES, configure_uploads
+from werkzeug.utils import secure_filename
+import os
+import datetime
+import random
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fuyuan:fuyuan@127.0.0.1/seesun-product-development'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['UPLOADED_IMAGES_DEST'] = 'static/images/products'
+app.config['UPLOADED_IMAGES_URL'] = '/static/images/products'
+uploaded_images = UploadSet('images', IMAGES)
+configure_uploads(app, uploaded_images)
+app.config['ALLOWED_EXTENSIONS'] = set(['jpg', 'png', 'gif'])
 db = SQLAlchemy(app)
 manager = Manager(app)
 bootstrap = Bootstrap(app)
@@ -56,11 +65,20 @@ def products():
     form.product_category_id.data = 1
     if form.validate_on_submit():
         product_category = ProductCategory.query.get_or_404(form.product_category_id.data)
+        upload_files = request.files.getlist('image_links[]')
+        if len(upload_files) < 1:
+            flash("必须上传图片")
+        filenames = []
+        for file in upload_files:
+            if file and allowed_file(file.filename):
+                filename = (uploaded_images.save(file, name=secure_filename(file.filename)))
+                filenames.append(filename)
         product = Product(
             name=form.name.data,
             code=form.code.data,
             description=form.description.data,
-            product_category=product_category
+            product_category=product_category,
+            product_image_links=filenames
         )
         db.session.add(product)
         db.session.commit()
@@ -199,7 +217,7 @@ class Product(db.Model):
     name = db.Column(db.String(64), unique=True)
     code = db.Column(db.String(32), unique=True)
     description = db.Column(db.Text)
-    product_image_links = db.Column(db.String(256))
+    product_image_links = db.Column(db.JSON)
     rating = db.Column(db.Float)
 
     product_skus = db.relationship('ProductSku', backref='product')
@@ -221,6 +239,9 @@ class ProductSku(db.Model):
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
 
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 if __name__ == '__main__':
     manager.run()
