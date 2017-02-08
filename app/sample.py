@@ -7,6 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, HiddenField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
+from flaskckeditor import CKEditor
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -48,6 +49,29 @@ def redirect_v():
     return redirect('http://www.baidu.com')
 
 
+@app.route("/products", methods=['GET', 'POST'])
+def products():
+    form = ProductForm()
+    form.product_category_id.data = 1
+    if form.validate_on_submit():
+        product = Product(
+            name=form.name.data,
+            code=form.code.data,
+            description=form.description.data
+        )
+        db.session.add(product)
+        db.session.commit()
+        flash("产品创建成功")
+        return redirect(url_for("products"))
+    return render_template("products.html", form=form)
+
+
+@app.route('/ckupload')
+def ckupload():
+    form = ProductForm()
+    response = form.upload(endpoint=app)
+    return response
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
@@ -65,16 +89,24 @@ class ProductCategoryForm(FlaskForm):
 
 class SkuFeatureForm(FlaskForm):
     product_category_id = HiddenField(validators=[DataRequired()])
-    name = StringField('特征名称 ', validators=[DataRequired()])
-    description = TextAreaField('特征描述 ')
-    sku_feature_type = StringField('特征类别')
-    submit = SubmitField('创建产品特征')
+    name = StringField('属性名称 ', validators=[DataRequired()])
+    description = TextAreaField('属性描述 ')
+    sku_feature_type = StringField('属性类别')
+    submit = SubmitField('创建产品属性')
 
 
 class SkuOptionForm(FlaskForm):
     sku_feature_id = HiddenField(validators=[DataRequired()])
-    name = StringField('特征值 ', validators=[DataRequired()])
-    submit = SubmitField('创建特征值')
+    name = StringField('属性值 ', validators=[DataRequired()])
+    submit = SubmitField('创建属性值')
+
+
+class ProductForm(FlaskForm, CKEditor):
+    product_category_id = HiddenField(validators=[DataRequired()])
+    name = StringField('产品名称', validators=[DataRequired()])
+    code = StringField('产品代码')
+    description = TextAreaField('产品描述')
+    submit = SubmitField('创建产品')
 
 
 class ProductCategory(db.Model):
