@@ -63,6 +63,53 @@ def redirect_v():
     return redirect('http://www.baidu.com')
 
 
+@app.route("/product_categories", methods=['GET', 'POST'])
+def product_categories():
+    form = ProductCategoryForm()
+    pcs = ProductCategory.query.all()
+    if form.validate_on_submit():
+        pc = ProductCategory(name=form.name.data)
+        db.session.add(pc)
+        flash('创建成功!')
+        return redirect(url_for('product_categories'))
+    return render_template('product_categories.html', form=form, pcs=pcs)
+
+
+@app.route("/sku_features", methods=['GET', 'POST'])
+def sku_features():
+    form = SkuFeatureForm()
+    category = ProductCategory.query.get_or_404(request.args.get('category'))
+    form.product_category_id.data = category.id
+    if form.validate_on_submit():
+        product_category = ProductCategory.query.get_or_404(request.form.get("product_category_id"))
+        sku_feature = SkuFeature(
+            name=form.name.data,
+            description=form.description.data,
+            product_category=product_category
+        )
+        db.session.add(sku_feature)
+        flash('创建成功!')
+        return redirect(url_for('product_categories'))
+    return render_template('sku_features.html', form=form, category=category)
+
+
+@app.route("/sku_options", methods=['GET', 'POST'])
+def sku_options():
+    form = SkuOptionForm()
+    sku_feature = SkuFeature.query.get_or_404(request.args.get('sku_feature_id'))
+    form.sku_feature_id.data = sku_feature.id
+    if form.validate_on_submit():
+        sku_feature = SkuFeature.query.get_or_404(request.form.get("sku_feature_id"))
+        sku_option = SkuOption(
+            name=form.name.data,
+            sku_feature=sku_feature
+        )
+        db.session.add(sku_option)
+        flash('创建成功!')
+        return redirect(url_for('product_categories'))
+    return render_template('sku_options.html', form=form, sku_feature=sku_feature)
+
+
 @app.route("/products", methods=['GET', 'POST'])
 def products():
     form = ProductForm()
@@ -216,8 +263,7 @@ class SkuFeatureForm(FlaskForm):
     product_category_id = HiddenField(validators=[DataRequired()])
     name = StringField('属性名称 ', validators=[DataRequired()])
     description = TextAreaField('属性描述 ')
-    sku_feature_type = StringField('属性类别')
-    submit = SubmitField('创建产品属性')
+    submit = SubmitField('创建属性名称')
 
 
 class SkuOptionForm(FlaskForm):

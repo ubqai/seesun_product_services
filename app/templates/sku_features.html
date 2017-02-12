@@ -1,0 +1,10 @@
+{% extends 'base.html'%}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>为产品目录：{{ category.name }}添加属性名称：</h1>
+    </div>
+    {{ wtf.quick_form(form) }}
+
+{% endblock %}

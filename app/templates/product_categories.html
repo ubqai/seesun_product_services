@@ -1,0 +1,25 @@
+{% extends 'base.html'%}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>已创建如下产品目录：</h1>
+        <ul>
+            {% for pc in pcs %}
+                <li>{{ pc.name }}---------<a href="{{ url_for('sku_features', category=pc.id) }}">添加属性名称</a></li>
+                <ul>
+                    {% for sf in pc.sku_features %}
+                        <li>{{ sf.name }}---------<a href="{{ url_for('sku_options', sku_feature_id=sf.id) }}">添加属性值</a></li>
+                        <ul>
+                            {% for so in sf.sku_options %}
+                                <li>{{ so.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </ul>
+    </div>
+    {{ wtf.quick_form(form) }}
+
+{% endblock %}
