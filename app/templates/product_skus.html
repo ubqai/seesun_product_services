@@ -1,0 +1,297 @@
+{% extends 'base.html'%}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+    <form class="form form-horizontal" method="post" role="form" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+        <input type="hidden" name="product_id" value="{{ product.id }}" />
+        <input type="hidden" name="sku_nums" value="{{ sku_nums }}" />
+        <table class="table table-condensed">
+            <thead>
+                {% for k,v in sku_ft_dict.items() %}
+                    <th>{{ v[0].name }}</th>
+                {% endfor %}
+                <th>Sku代码</th>
+                <th>价格</th>
+                <th>库存</th>
+                <th>Barcode</th>
+                <th>hscode</th>
+                <th>重量</th>
+                <th>缩略图</th>
+            </thead>
+            <tbody>
+                {% set current = 0 %}
+                {% if sku_ft_num == 1 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current = current + 1 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                {% elif sku_ft_num == 2 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index %}
+                        {% set current = current1 + current2 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                {% elif sku_ft_num == 3 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index0 * loop.length %}
+                    {% for sku_option3 in sku_ft_dict.get(3)[1] %}
+                        {% set current3 = loop.index %}
+                        {% set current = current1 + current2 + current3 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <td>{{ sku_option3.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option3.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                {% elif sku_ft_num == 4 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index0 * loop.length %}
+                    {% for sku_option3 in sku_ft_dict.get(3)[1] %}
+                        {% set current3 = loop.index0 * loop.length %}
+                    {% for sku_option4 in sku_ft_dict.get(4)[1] %}
+                        {% set current4 = loop.index %}
+                        {% set current = current1 + current2 + current3 + current4 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <td>{{ sku_option3.name }}</td>
+                            <td>{{ sku_option4.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option3.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option4.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                {% elif sku_ft_num == 5 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index0 * loop.length %}
+                    {% for sku_option3 in sku_ft_dict.get(3)[1] %}
+                        {% set current3 = loop.index0 * loop.length %}
+                    {% for sku_option4 in sku_ft_dict.get(4)[1] %}
+                        {% set current4 = loop.index0 * loop.length %}
+                    {% for sku_option5 in sku_ft_dict.get(5)[1] %}
+                        {% set current5 = loop.index %}
+                        {% set current = current1 + current2 + current3 + current4 + current5 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <td>{{ sku_option3.name }}</td>
+                            <td>{{ sku_option4.name }}</td>
+                            <td>{{ sku_option5.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option3.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option4.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option5.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                {% elif sku_ft_num == 6 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index0 * loop.length %}
+                    {% for sku_option3 in sku_ft_dict.get(3)[1] %}
+                        {% set current3 = loop.index0 * loop.length %}
+                    {% for sku_option4 in sku_ft_dict.get(4)[1] %}
+                        {% set current4 = loop.index0 * loop.length %}
+                    {% for sku_option5 in sku_ft_dict.get(5)[1] %}
+                        {% set current5 = loop.index0 * loop.length %}
+                    {% for sku_option6 in sku_ft_dict.get(6)[1] %}
+                        {% set current6 = loop.index %}
+                        {% set current = current1 + current2 + current3 + current4 + current5 + current6 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <td>{{ sku_option3.name }}</td>
+                            <td>{{ sku_option4.name }}</td>
+                            <td>{{ sku_option5.name }}</td>
+                            <td>{{ sku_option6.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option3.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option4.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option5.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option6.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                {% elif sku_ft_num == 7 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index0 * loop.length %}
+                    {% for sku_option3 in sku_ft_dict.get(3)[1] %}
+                        {% set current3 = loop.index0 * loop.length %}
+                    {% for sku_option4 in sku_ft_dict.get(4)[1] %}
+                        {% set current4 = loop.index0 * loop.length %}
+                    {% for sku_option5 in sku_ft_dict.get(5)[1] %}
+                        {% set current5 = loop.index0 * loop.length %}
+                    {% for sku_option6 in sku_ft_dict.get(6)[1] %}
+                        {% set current6 = loop.index0 * loop.length %}
+                    {% for sku_option7 in sku_ft_dict.get(7)[1] %}
+                        {% set current7 = loop.index %}
+                        {% set current = current1 + current2 + current3 + current4 + current5 + current6 + current7 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <td>{{ sku_option3.name }}</td>
+                            <td>{{ sku_option4.name }}</td>
+                            <td>{{ sku_option5.name }}</td>
+                            <td>{{ sku_option6.name }}</td>
+                            <td>{{ sku_option7.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option3.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option4.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option5.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option6.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option7.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                {% elif sku_ft_num == 8 %}
+                    {% for sku_option1 in sku_ft_dict.get(1)[1] %}
+                        {% set current1 = loop.index0 * loop.length %}
+                    {% for sku_option2 in sku_ft_dict.get(2)[1] %}
+                        {% set current2 = loop.index0 * loop.length %}
+                    {% for sku_option3 in sku_ft_dict.get(3)[1] %}
+                        {% set current3 = loop.index0 * loop.length %}
+                    {% for sku_option4 in sku_ft_dict.get(4)[1] %}
+                        {% set current4 = loop.index0 * loop.length %}
+                    {% for sku_option5 in sku_ft_dict.get(5)[1] %}
+                        {% set current5 = loop.index0 * loop.length %}
+                    {% for sku_option6 in sku_ft_dict.get(6)[1] %}
+                        {% set current6 = loop.index0 * loop.length %}
+                    {% for sku_option7 in sku_ft_dict.get(7)[1] %}
+                        {% set current7 = loop.index0 * loop.length %}
+                    {% for sku_option8 in sku_ft_dict.get(8)[1] %}
+                        {% set current8 = loop.index %}
+                        {% set current = current1 + current2 + current3 + current4 + current5 + current6 + current7 + current8 %}
+                        <tr>
+                            <td>{{ sku_option1.name }}</td>
+                            <td>{{ sku_option2.name }}</td>
+                            <td>{{ sku_option3.name }}</td>
+                            <td>{{ sku_option4.name }}</td>
+                            <td>{{ sku_option5.name }}</td>
+                            <td>{{ sku_option6.name }}</td>
+                            <td>{{ sku_option7.name }}</td>
+                            <td>{{ sku_option8.name }}</td>
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option1.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option2.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option3.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option4.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option5.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option6.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option7.id }}">
+                            <input type="hidden" name="{{ current }}sku_option_ids[]" value="{{ sku_option8.id }}">
+                            <td><input type="text" name="{{ current }}code" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}price" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}stock" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}barcode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}hscode" class="form-control" /></td>
+                            <td><input type="text" name="{{ current }}weight" class="form-control" /></td>
+                            <td><input type="file" name="{{ current }}thumbnail" class="form-control" /></td>
+                        </tr>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+        {{ wtf.form_field(form.submit) }}
+    </form>
+{% endblock %}

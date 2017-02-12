@@ -9,10 +9,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskckeditor import CKEditor
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from werkzeug.utils import secure_filename
+from collections import OrderedDict
 from os import path
 import os
 import datetime
 import random
+import logging
+from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -95,6 +98,65 @@ def products():
     return render_template("products.html", form=form, category=category)
 
 
+@app.route("/product_skus", methods=['GET', 'POST'])
+def product_skus():
+    form = ProductSkuForm()
+
+    if form.validate_on_submit():
+        nums = int(request.form.get('sku_nums'))
+        product = Product.query.get_or_404(request.form.get('product_id'))
+        for i in range(1, nums+1):
+            option_ids = request.form.getlist("%dsku_option_ids[]" % i)
+            upload_thumbnail = request.files.get('%dthumbnail' % i)
+            if upload_thumbnail is not None and allowed_file(upload_thumbnail.filename):
+                try:
+                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + upload_thumbnail.filename)
+                except:
+                    parts = path.splitext(upload_thumbnail.filename)
+                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + parts[1])
+                filename = (uploaded_images.save(upload_thumbnail, name=new_filename))
+            code = request.form.get("%dcode" % i)
+            price = request.form.get("%dprice" % i)
+            stock = request.form.get("%dstock" % i)
+            barcode = request.form.get("%dbarcode" % i)
+            hscode = request.form.get("%dhscode" % i)
+            weight = request.form.get("%dweight" % i)
+            if price is not None and price != '':
+                product_sku = ProductSku(
+                    product=product,
+                    code=code,
+                    price=price,
+                    stocks=stock,
+                    barcode=str(option_ids),
+                    hscode=hscode,
+                    weight=weight,
+                    thumbnail=filename
+                )
+                db.session.add(product_sku)
+                for option_id in option_ids:
+                    sku_option = SkuOption.query.get_or_404(option_id)
+                    product_sku.sku_options.append(sku_option)
+        db.session.commit()
+        flash("属性管理成功")
+        return redirect(url_for("product_skus") + "?product_id=%d" % product.id)
+    else:
+        product = Product.query.get_or_404(request.args.get('product_id'))
+        sku_options = product.sku_options
+        sku_features = {x.sku_feature for x in sku_options}
+        sku_ft_dict = OrderedDict()
+        sku_ft_num = 1
+        for sku_ft in sorted(sku_features, key=lambda x: x.id):
+            sku_ft_dict[sku_ft_num] = [sku_ft,
+                                       sorted(set(sku_ft.sku_options) & set(product.sku_options.all()),
+                                              key=lambda x: x.id)]
+            sku_ft_num += 1
+        sku_nums = 1
+        for k, v in sku_ft_dict.items():
+            sku_nums *= len(v[1])
+        return render_template("product_skus.html", form=form, product=product,
+                           sku_ft_dict=sku_ft_dict, sku_ft_num=sku_ft_num-1, sku_nums=sku_nums)
+
+
 # --- CKEditor file upload ---
 def gen_rnd_filename():
     filename_prefix = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -169,6 +231,10 @@ class ProductForm(FlaskForm, CKEditor):
     code = StringField('产品代码')
     description = TextAreaField('产品描述')
     submit = SubmitField('创建产品')
+
+
+class ProductSkuForm(FlaskForm):
+    submit = SubmitField('提交')
 
 
 class ProductCategory(db.Model):
