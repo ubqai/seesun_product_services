@@ -110,6 +110,12 @@ def sku_options():
     return render_template('sku_options.html', form=form, sku_feature=sku_feature)
 
 
+@app.route("/products_manage", methods=['GET'])
+def products_manage():
+    pcs = ProductCategory.query.all()
+    return render_template('products_manage.html', pcs=pcs)
+
+
 @app.route("/products", methods=['GET', 'POST'])
 def products():
     form = ProductForm()
@@ -141,7 +147,7 @@ def products():
         db.session.add(product)
         db.session.commit()
         flash("产品创建成功")
-        return redirect(url_for("products")+"?category=%d" % category.id)
+        return redirect(url_for("product_skus", product_id=product.id))
     return render_template("products.html", form=form, category=category)
 
 
@@ -155,6 +161,7 @@ def product_skus():
         for i in range(1, nums+1):
             option_ids = request.form.getlist("%dsku_option_ids[]" % i)
             upload_thumbnail = request.files.get('%dthumbnail' % i)
+            filename = ""
             if upload_thumbnail is not None and allowed_file(upload_thumbnail.filename):
                 try:
                     new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + upload_thumbnail.filename)
@@ -174,7 +181,7 @@ def product_skus():
                     code=code,
                     price=price,
                     stocks=stock,
-                    barcode=str(option_ids),
+                    barcode=barcode,
                     hscode=hscode,
                     weight=weight,
                     thumbnail=filename
@@ -185,7 +192,7 @@ def product_skus():
                     product_sku.sku_options.append(sku_option)
         db.session.commit()
         flash("属性管理成功")
-        return redirect(url_for("product_skus") + "?product_id=%d" % product.id)
+        return redirect(url_for("product_skus", product_id=product.id))
     else:
         product = Product.query.get_or_404(request.args.get('product_id'))
         sku_options = product.sku_options
@@ -197,11 +204,8 @@ def product_skus():
                                        sorted(set(sku_ft.sku_options) & set(product.sku_options.all()),
                                               key=lambda x: x.id)]
             sku_ft_num += 1
-        sku_nums = 1
-        for k, v in sku_ft_dict.items():
-            sku_nums *= len(v[1])
-        return render_template("product_skus.html", form=form, product=product,
-                           sku_ft_dict=sku_ft_dict, sku_ft_num=sku_ft_num-1, sku_nums=sku_nums)
+        return render_template("product_skus.html", form=form, product=product, sku_ft_dict=sku_ft_dict,
+                               sku_ft_num=sku_ft_num-1)
 
 
 # --- CKEditor file upload ---
@@ -333,7 +337,7 @@ class Product(db.Model):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
     product_category_id = db.Column(db.Integer, db.ForeignKey('product_categories.id'))
-    name = db.Column(db.String(64), unique=True)
+    name = db.Column(db.String(64))
     code = db.Column(db.String(32), unique=True)
     description = db.Column(db.Text)
     product_image_links = db.Column(db.JSON)
