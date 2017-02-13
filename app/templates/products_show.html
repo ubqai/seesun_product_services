@@ -1,0 +1,26 @@
+{% extends 'base.html'%}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>产品详情：</h1>
+        <ul>
+            <li>产品名称：{{ product.name }}</li>
+            <li>产品代码：{{ product.code }}</li>
+            <li>产品描述：{{ product.description | safe }}</li>
+            <li>
+                产品图片：
+                {% for img_src in product.product_image_links %}
+                    <img src="{{ url_for('static', filename="images/products/%s" % img_src) }}">
+                {% endfor %}
+            </li>
+            {% if product.product_skus != [] %}
+                <li>Sku详情：</li>
+
+            {% else %}
+                <li><a href="{{ url_for("product_skus", product_id=product.id) }}">管理SKU</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+{% endblock %}

@@ -22,8 +22,8 @@ app.config['SECRET_KEY'] = 'hard to guess string'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fuyuan:fuyuan@127.0.0.1/seesun-product-development'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['UPLOADED_IMAGES_DEST'] = 'static/images/products'
-app.config['UPLOADED_IMAGES_URL'] = '/static/images/products'
+app.config['UPLOADED_IMAGES_DEST'] = 'app/static/images/products'
+app.config['UPLOADED_IMAGES_URL'] = '/app/static/images/products'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 uploaded_images = UploadSet('images', IMAGES)
 configure_uploads(app, uploaded_images)
@@ -36,31 +36,7 @@ moment = Moment(app)
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-    form = ProductCategoryForm()
-    pcs = ProductCategory.query.all()
-    if form.validate_on_submit():
-        pc = ProductCategory(name=form.name.data)
-        db.session.add(pc)
-        flash('创建成功!')
-        return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.datetime.utcnow(), form=form, pcs=pcs)
-
-
-@app.route("/user/<name>")
-def user(name):
-    return render_template("user.html", name=name)
-
-
-@app.route("/response")
-def response_v():
-    response = make_response('<h1>This document carries a cookie!</h1>')
-    response.set_cookie('answer', '42')
-    return response
-
-
-@app.route("/redirect")
-def redirect_v():
-    return redirect('http://www.baidu.com')
+    return render_template('index.html')
 
 
 @app.route("/product_categories", methods=['GET', 'POST'])
@@ -93,6 +69,20 @@ def sku_features():
     return render_template('sku_features.html', form=form, category=category)
 
 
+@app.route("/sku_feature_edit/<int:id>", methods=['GET', 'POST'])
+def sku_feature_edit(id):
+    sku_feature = SkuFeature.query.get_or_404(id)
+    category = sku_feature.product_category
+    form = SkuFeatureForm(name=sku_feature.name, description=sku_feature.description, product_category_id=category.id)
+    if form.validate_on_submit():
+        sku_feature.name = form.name.data,
+        sku_feature.description = form.description.data
+        db.session.add(sku_feature)
+        flash('修改成功!')
+        return redirect(url_for('product_categories'))
+    return render_template('sku_feature_edit.html', form=form, category=category)
+
+
 @app.route("/sku_options", methods=['GET', 'POST'])
 def sku_options():
     form = SkuOptionForm()
@@ -110,10 +100,29 @@ def sku_options():
     return render_template('sku_options.html', form=form, sku_feature=sku_feature)
 
 
+@app.route("/sku_option_edit/<int:id>", methods=['GET', 'POST'])
+def sku_option_edit(id):
+    sku_option = SkuOption.query.get_or_404(id)
+    sku_feature = sku_option.sku_feature
+    form = SkuOptionForm(name=sku_option.name, sku_feature_id=sku_feature.id)
+    if form.validate_on_submit():
+        sku_option.name = form.name.data
+        db.session.add(sku_option)
+        flash('修改成功!')
+        return redirect(url_for('product_categories'))
+    return render_template('sku_option_edit.html', form=form, sku_feature=sku_feature)
+
+
 @app.route("/products_manage", methods=['GET'])
 def products_manage():
     pcs = ProductCategory.query.all()
     return render_template('products_manage.html', pcs=pcs)
+
+
+@app.route("/products_show/<int:id>", methods=['GET'])
+def products_show(id):
+    product = Product.query.get_or_404(id)
+    return render_template("products_show.html", product=product)
 
 
 @app.route("/products", methods=['GET', 'POST'])
@@ -192,7 +201,7 @@ def product_skus():
                     product_sku.sku_options.append(sku_option)
         db.session.commit()
         flash("属性管理成功")
-        return redirect(url_for("product_skus", product_id=product.id))
+        return redirect(url_for("products_show", id=product.id))
     else:
         product = Product.query.get_or_404(request.args.get('product_id'))
         sku_options = product.sku_options
@@ -260,20 +269,20 @@ def internal_server_error(e):
 
 class ProductCategoryForm(FlaskForm):
     name = StringField('产品目录名称 ', validators=[DataRequired()])
-    submit = SubmitField('创建产品目录')
+    submit = SubmitField('提交')
 
 
 class SkuFeatureForm(FlaskForm):
     product_category_id = HiddenField(validators=[DataRequired()])
     name = StringField('属性名称 ', validators=[DataRequired()])
     description = TextAreaField('属性描述 ')
-    submit = SubmitField('创建属性名称')
+    submit = SubmitField('提交')
 
 
 class SkuOptionForm(FlaskForm):
     sku_feature_id = HiddenField(validators=[DataRequired()])
     name = StringField('属性值 ', validators=[DataRequired()])
-    submit = SubmitField('创建属性值')
+    submit = SubmitField('提交')
 
 
 class ProductForm(FlaskForm, CKEditor):

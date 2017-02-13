@@ -1,19 +1,10 @@
 {% extends 'base.html'%}
 {% import "bootstrap/wtf.html" as wtf %}
 
+
 {% block page_content %}
     <div class="page-header">
-        <h1>已创建如下产品目录：</h1>
-        <ul>
-            {% for pc in pcs %}
-                <li>{{ pc.name }}</li>
-            {% endfor %}
-        </ul>
+        <h1><a href="{{ url_for('product_categories') }}">产品目录管理</a></h1>
+        <h1><a href="{{ url_for('products_manage') }}">产品管理</a></h1>
     </div>
-    {{ wtf.quick_form(form) }}
-    <p>
-        The local date and time is {{ moment(current_time).format('LLL')}}.
-        That was {{moment(current_time).fromNow(refresh=True)}}
-    </p>
-
 {% endblock %}

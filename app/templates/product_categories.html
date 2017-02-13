@@ -9,10 +9,14 @@
                 <li>{{ pc.name }}---------<a href="{{ url_for('sku_features', category=pc.id) }}">添加属性名称</a></li>
                 <ul>
                     {% for sf in pc.sku_features %}
-                        <li>{{ sf.name }}---------<a href="{{ url_for('sku_options', sku_feature_id=sf.id) }}">添加属性值</a></li>
+                        <li>
+                            {{ sf.name }}
+                            ---------<a href="{{ url_for('sku_options', sku_feature_id=sf.id) }}">添加属性值</a>
+                            ---------<a href="{{ url_for('sku_feature_edit', id=sf.id) }}">修改</a>
+                        </li>
                         <ul>
                             {% for so in sf.sku_options %}
-                                <li>{{ so.name }}</li>
+                                <li>{{ so.name }}---------<a href="{{ url_for('sku_option_edit', id=so.id) }}">修改</a></li>
                             {% endfor %}
                         </ul>
                     {% endfor %}
