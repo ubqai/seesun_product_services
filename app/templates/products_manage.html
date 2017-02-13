@@ -6,12 +6,12 @@
         <h1>已创建如下产品目录：</h1>
         <ul>
             {% for pc in pcs %}
-                <li>{{ pc.name }}---------<a href="{{ url_for('products', category=pc.id) }}">添加产品</a></li>
+                <li>{{ pc.name }}---------<a href="{{ url_for('main.products', category=pc.id) }}">添加产品</a></li>
                 <ul>
                     {% for product in pc.products %}
                         <li>{{ product.name }}
-                            ---------<a href="{{ url_for('products_show', id=product.id) }}">查看</a>
-                            ---------<a href="{{ url_for('product_edit', id=product.id) }}">修改</a>
+                            ---------<a href="{{ url_for('main.products_show', id=product.id) }}">查看</a>
+                            ---------<a href="{{ url_for('main.product_edit', id=product.id) }}">修改</a>
                         </li>
                     {% endfor %}
                 </ul>

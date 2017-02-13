@@ -18,7 +18,7 @@
                 <li>Sku详情：</li>
 
             {% else %}
-                <li><a href="{{ url_for("product_skus", product_id=product.id) }}">管理SKU</a></li>
+                <li><a href="{{ url_for("main.product_skus", product_id=product.id) }}">管理SKU</a></li>
             {% endif %}
         </ul>
     </div>
