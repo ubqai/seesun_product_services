@@ -9,7 +9,10 @@
                 <li>{{ pc.name }}---------<a href="{{ url_for('products', category=pc.id) }}">添加产品</a></li>
                 <ul>
                     {% for product in pc.products %}
-                        <li>{{ product.name }}---------<a href="{{ url_for('products_show', id=product.id) }}">管理</a></li>
+                        <li>{{ product.name }}
+                            ---------<a href="{{ url_for('products_show', id=product.id) }}">查看</a>
+                            ---------<a href="{{ url_for('product_edit', id=product.id) }}">修改</a>
+                        </li>
                     {% endfor %}
                 </ul>
             {% endfor %}

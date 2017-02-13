@@ -161,6 +161,34 @@ def products():
     return render_template("products.html", form=form, category=category)
 
 
+@app.route("/products/<int:id>", methods=['GET', 'POST'])
+def product_edit(id):
+    product = Product.query.get_or_404(id)
+    form = ProductForm(name=product.name, code=product.code, description=product.description)
+    category = product.product_category
+    if form.validate_on_submit():
+        upload_files = request.files.getlist('image_links[]')
+        filenames = []
+        for file in upload_files:
+            if file and allowed_file(file.filename):
+                try:
+                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + file.filename)
+                except:
+                    parts = path.splitext(file.filename)
+                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + parts[1])
+                filename = (uploaded_images.save(file, name=new_filename))
+                filenames.append(filename)
+        product.name = form.name.data
+        product.code = form.code.data
+        product.description = form.description.data
+        product.product_image_links = filenames
+        db.session.add(product)
+        db.session.commit()
+        flash("修改成功")
+        return redirect(url_for("products_show", id=product.id))
+    return render_template("product_edit.html", form=form, category=category)
+
+
 @app.route("/product_skus", methods=['GET', 'POST'])
 def product_skus():
     form = ProductSkuForm()
@@ -290,7 +318,7 @@ class ProductForm(FlaskForm, CKEditor):
     name = StringField('产品名称', validators=[DataRequired()])
     code = StringField('产品代码')
     description = TextAreaField('产品描述')
-    submit = SubmitField('创建产品')
+    submit = SubmitField('提交')
 
 
 class ProductSkuForm(FlaskForm):
