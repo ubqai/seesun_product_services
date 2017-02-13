@@ -10,12 +10,11 @@ from flaskckeditor import CKEditor
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
+from flask_migrate import Migrate, MigrateCommand
 from os import path
 import os
 import datetime
 import random
-import logging
-from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hard to guess string'
@@ -32,6 +31,8 @@ db = SQLAlchemy(app)
 manager = Manager(app)
 bootstrap = Bootstrap(app)
 moment = Moment(app)
+migrate = Migrate(app, db)
+manager.add_command('db', MigrateCommand)
 
 
 @app.route("/", methods=['GET', 'POST'])
