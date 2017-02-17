@@ -9,7 +9,6 @@ from os import path
 import os
 import datetime
 import random
-import logging
 
 
 @main.route("/", methods=['GET', 'POST'])

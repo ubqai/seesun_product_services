@@ -11,6 +11,14 @@ class ProductCategory(db.Model):
     def __repr__(self):
         return '<ProductCategory %r>' % self.name
 
+    def to_json(self):
+        json_category = {
+            "id": self.id,
+            "name": self.name,
+            "features": [feature.to_json() for feature in self.sku_features]
+        }
+        return json_category
+
 
 class SkuFeature(db.Model):
     __tablename__ = 'sku_features'
@@ -24,6 +32,14 @@ class SkuFeature(db.Model):
     def __repr__(self):
         return '<SkuFeature %r>' % self.name
 
+    def to_json(self):
+        json_feature = {
+            "id": self.id,
+            "name": self.name,
+            "options": [option.to_json() for option in self.sku_options]
+        }
+        return json_feature
+
 
 class SkuOption(db.Model):
     __tablename__ = 'sku_options'
@@ -33,6 +49,13 @@ class SkuOption(db.Model):
 
     def __repr__(self):
         return '<SkuOption %r>' % self.name
+
+    def to_json(self):
+        json_option = {
+            "id": self.id,
+            "name": self.name
+        }
+        return json_option
 
 products_and_skuoptions = db.Table(
     'products_and_skuoptions',
