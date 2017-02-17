@@ -13,7 +13,10 @@ class Config:
 
     @staticmethod
     def init_app(app):
-        pass
+        from logging import StreamHandler
+        file_handler = StreamHandler()
+#       handler = logging.FileHandler('flask.log')
+        app.logger.addHandler(file_handler)
 
 
 class DevelopmentConfig(Config):
