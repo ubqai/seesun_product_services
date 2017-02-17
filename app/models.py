@@ -13,8 +13,8 @@ class ProductCategory(db.Model):
 
     def to_json(self):
         json_category = {
-            "id": self.id,
-            "name": self.name,
+            "category_id": self.id,
+            "category_name": self.name,
             "features": [feature.to_json() for feature in self.sku_features]
         }
         return json_category
@@ -34,8 +34,8 @@ class SkuFeature(db.Model):
 
     def to_json(self):
         json_feature = {
-            "id": self.id,
-            "name": self.name,
+            "feature_id": self.id,
+            "feature_name": self.name,
             "options": [option.to_json() for option in self.sku_options]
         }
         return json_feature
@@ -52,8 +52,8 @@ class SkuOption(db.Model):
 
     def to_json(self):
         json_option = {
-            "id": self.id,
-            "name": self.name
+            "option_id": self.id,
+            "option_name": self.name
         }
         return json_option
 
@@ -84,6 +84,24 @@ class Product(db.Model):
     sku_options = db.relationship('SkuOption', secondary=products_and_skuoptions,
                                   backref=db.backref('products', lazy='dynamic'), lazy='dynamic')
 
+    def to_json(self):
+        json_product = {
+            "product_id": self.id,
+            "name": self.name,
+            "code": self.code,
+            "description": self.description,
+            "images": self.product_image_links
+        }
+        return json_product
+
+    def to_sku_json(self):
+        json_skus = {
+            "product_id": self.id,
+            "name": self.name,
+            "skus": [sku.to_json() for sku in self.product_skus]
+        }
+        return json_skus
+
 
 class ProductSku(db.Model):
     __tablename__ = 'product_skus'
@@ -95,6 +113,22 @@ class ProductSku(db.Model):
     barcode = db.Column(db.String)
     hscode = db.Column(db.String)
     weight = db.Column(db.Float)
+    stocks_for_order = db.Column(db.Integer)
     thumbnail = db.Column(db.Text)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
+
+    def to_json(self):
+        json_sku = {
+            "sku_id": self.id,
+            "code": self.code,
+            "price": self.price,
+            "stocks": self.stocks - self.stocks_for_order,
+            "barcode": self.barcode,
+            "hscode": self.hscode,
+            "weight": self.weight,
+            "thumbnail": self.thumbnail,
+            "options": [{option.sku_feature.name: option.name} for option in self.sku_options]
+        }
+        return json_sku
+

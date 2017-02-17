@@ -13,7 +13,7 @@ def create_feature():
     if not isinstance(request.json.get('product_category_id'), str):
         return bad_request("product_category_id params is necessary")
     if not isinstance(request.json.get('feature_infos'), list):
-        return bad_request("feature_names params must be a list")
+        return bad_request("feature_infos params must be a list")
     category = ProductCategory.query.get_or_404(request.json.get('product_category_id'))
     for feature_info in request.json.get('feature_infos'):
         feature = SkuFeature(

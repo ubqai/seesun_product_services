@@ -18,7 +18,11 @@ depends_on = ${repr(depends_on)}
 
 def upgrade():
     ${upgrades if upgrades else "pass"}
+    op.execute("create sequence product_code_id_seq start with 1 increment by 1 ")
+    op.execute("create sequence sku_code_id_seq start with 1 increment by 1 ")
 
 
 def downgrade():
     ${downgrades if downgrades else "pass"}
+    op.execute(sa.schema.DropSequence(sa.Sequence("product_code_id_seq")))
+    op.execute(sa.schema.DropSequence(sa.Sequence("sku_code_id_seq")))
