@@ -3,6 +3,8 @@ from .. import db
 from ..models import ProductCategory, Product, SkuOption
 from . import api
 from .errors import bad_request
+import datetime
+from app.exceptions import ValidationError
 
 
 # 创建产品
@@ -15,9 +17,16 @@ def create_product():
     if not isinstance(request.json.get('product_info'), dict):
         return bad_request("product_info params must be a dict")
     category = ProductCategory.query.get_or_404(request.json.get('product_category_id'))
+    code = request.json.get('product_info').get('code')
+    if code is None or code.strip() == '':
+        code = "SS%s" % datetime.datetime.now().strftime('%y%m%d%H%M%S')
+    else:
+        if Product.query.filter_by(code=code).first() is not None:
+            db.session.rollback()
+            raise ValidationError("%s product code has existed" % code, 400)
     product = Product(
         name=request.json.get('product_info').get('name'),
-        code=request.json.get('product_info').get('code'),
+        code=code,
         description=request.json.get('product_info').get('description'),
         product_category=category,
         product_image_links=request.json.get('product_info').get('product_image_links')

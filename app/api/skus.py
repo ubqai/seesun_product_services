@@ -3,6 +3,8 @@ from .. import db
 from ..models import Product, SkuOption, ProductSku
 from . import api
 from .errors import bad_request
+import datetime
+from app.exceptions import ValidationError
 
 
 # 创建产品sku
@@ -15,10 +17,19 @@ def create_skus():
     if not isinstance(request.json.get('sku_infos'), list):
         return bad_request("sku_info params must be a list")
     product = Product.query.get_or_404(request.json.get('product_id'))
+    seq = 1
     for sku_info in request.json.get('sku_infos'):
+        code = sku_info.get("code")
+        if code is None or code.strip() == '':
+            code = "SKU%s%s" % (datetime.datetime.now().strftime('%y%m%d%H%M%S'), seq)
+            seq += 1
+        else:
+            if ProductSku.query.filter_by(code=code).first() is not None:
+                db.session.rollback()
+                raise ValidationError("%s sku code has existed" % code, 400)
         sku = ProductSku(
             product=product,
-            code=sku_info.get("code"),
+            code=code,
             price=sku_info.get("price"),
             stocks=sku_info.get("stocks"),
             barcode=sku_info.get("barcode"),

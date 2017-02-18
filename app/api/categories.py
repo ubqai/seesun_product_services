@@ -1,8 +1,9 @@
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from .. import db
 from ..models import ProductCategory
 from . import api
 from .errors import bad_request
+from app.exceptions import ValidationError
 
 
 # 创建产品目录
@@ -15,6 +16,9 @@ def create_category():
     if not isinstance(request.json.get('category_names'), list):
         return bad_request("category_name params must be a list")
     for name in request.json.get('category_names'):
+        if ProductCategory.query.filter_by(name=name).first() is not None:
+            db.session.rollback()
+            raise ValidationError("%s category has existed" % name, 400)
         category = ProductCategory(name=name)
         db.session.add(category)
     db.session.commit()
