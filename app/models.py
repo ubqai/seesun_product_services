@@ -53,7 +53,8 @@ class SkuOption(db.Model):
     def to_json(self):
         json_option = {
             "option_id": self.id,
-            "option_name": self.name
+            "option_name": self.name,
+            "feature_name": self.sku_feature.name
         }
         return json_option
 
@@ -90,7 +91,8 @@ class Product(db.Model):
             "name": self.name,
             "code": self.code,
             "description": self.description,
-            "images": self.product_image_links
+            "images": self.product_image_links,
+            "options": [option.to_json() for option in self.sku_options]
         }
         return json_product
 

@@ -52,3 +52,12 @@ def get_products(id):
     )
     response.status_code = 200
     return response
+
+
+@api.route("/product/<int:id>", methods=["GET"])
+def get_product(id):
+    response = jsonify(
+        Product.query.get_or_404(id).to_json()
+    )
+    response.status_code = 200
+    return response
