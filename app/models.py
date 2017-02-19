@@ -115,7 +115,7 @@ class ProductSku(db.Model):
     barcode = db.Column(db.String)
     hscode = db.Column(db.String)
     weight = db.Column(db.Float)
-    stocks_for_order = db.Column(db.Integer)
+    stocks_for_order = db.Column(db.Integer, default=0)
     thumbnail = db.Column(db.Text)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
