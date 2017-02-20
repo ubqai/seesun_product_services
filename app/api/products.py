@@ -38,7 +38,8 @@ def create_product():
     db.session.commit()
     response = jsonify(
         {
-            'status': "success"
+            'status': "success",
+            'product_id': product.id
         }
     )
     response.status_code = 201
