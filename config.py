@@ -21,16 +21,16 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql://fuyuan:fuyuan@127.0.0.1/seesun-product-development'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://craig:1qaz2wsx@127.0.0.1/seesun-product-development'
 
 
 class TestingConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql://fuyuan:fuyuan@127.0.0.1/seesun-product-development'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://craig:1qaz2wsx@127.0.0.1/seesun-product-development'
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'postgresql://fuyuan:fuyuan@127.0.0.1/seesun-product-development'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://craig:1qaz2wsx@127.0.0.1/seesun-product-development'
 
 
 config = {
