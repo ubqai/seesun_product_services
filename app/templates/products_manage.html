@@ -12,6 +12,7 @@
                         <li>{{ product.name }}
                             ---------<a href="{{ url_for('main.products_show', id=product.id) }}">查看</a>
                             ---------<a href="{{ url_for('main.product_edit', id=product.id) }}">修改</a>
+                            ---------<a href="{{ url_for('main.product_comments', id=product.id) }}">添加评论</a>
                         </li>
                     {% endfor %}
                 </ul>

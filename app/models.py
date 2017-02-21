@@ -134,3 +134,13 @@ class ProductSku(db.Model):
         }
         return json_sku
 
+
+class ProductComments(db.Model):
+    __tablename__ = 'product_comments'
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
+    user_nickname = db.Column(db.String(64))
+    comment_line = db.Column(db.Text)
+    rating = db.Column(db.String(32))
+    sharing_image_links = db.Column(db.Text)
+

@@ -1,8 +1,8 @@
 from . import main
 from flask import make_response, redirect, render_template, url_for, flash, request, current_app
 from .. import db, uploaded_images
-from ..models import ProductCategory, SkuFeature, SkuOption, Product, ProductSku
-from .forms import ProductCategoryForm, SkuFeatureForm, SkuOptionForm, ProductForm, ProductSkuForm
+from ..models import ProductCategory, SkuFeature, SkuOption, Product, ProductSku, ProductComments
+from .forms import ProductCategoryForm, SkuFeatureForm, SkuOptionForm, ProductForm, ProductSkuForm, ProductCommentForm
 from werkzeug.utils import secure_filename
 from collections import OrderedDict
 from os import path
@@ -75,6 +75,24 @@ def sku_options():
         flash('创建成功!')
         return redirect(url_for('main.product_categories'))
     return render_template('sku_options.html', form=form, sku_feature=sku_feature)
+
+
+@main.route("/product_comments/<int:id>", methods=['GET', 'POST'])
+def product_comments(id):
+    form = ProductCommentForm()
+    product_comment = ProductComments.query.all()
+    if form.validate_on_submit():
+        product_comment = ProductComments(
+            user_nickname=form.nickname.data,
+            product_id=id,
+            comment_line=form.commentline.data,
+            rating=form.rating.data,
+            sharing_image_links=form.sharelink.data
+        )
+        db.session.add(product_comment)
+        flash('创建成功')
+        return redirect(url_for('main.products_manage'))
+    return render_template('product_comments.html', form=form, product_comment=product_comment)
 
 
 @main.route("/sku_option_edit/<int:id>", methods=['GET', 'POST'])
@@ -172,13 +190,14 @@ def product_skus():
     if form.validate_on_submit():
         nums = int(request.form.get('sku_nums'))
         product = Product.query.get_or_404(request.form.get('product_id'))
-        for i in range(1, nums+1):
+        for i in range(1, nums + 1):
             option_ids = request.form.getlist("%dsku_option_ids[]" % i)
             upload_thumbnail = request.files.get('%dthumbnail' % i)
             filename = ""
             if upload_thumbnail is not None and allowed_file(upload_thumbnail.filename):
                 try:
-                    new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + upload_thumbnail.filename)
+                    new_filename = secure_filename(
+                        datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + upload_thumbnail.filename)
                 except:
                     parts = path.splitext(upload_thumbnail.filename)
                     new_filename = secure_filename(datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + parts[1])
@@ -219,7 +238,7 @@ def product_skus():
                                               key=lambda x: x.id)]
             sku_ft_num += 1
         return render_template("product_skus.html", form=form, product=product, sku_ft_dict=sku_ft_dict,
-                               sku_ft_num=sku_ft_num-1)
+                               sku_ft_num=sku_ft_num - 1)
 
 
 # --- CKEditor file upload ---

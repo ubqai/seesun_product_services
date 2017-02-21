@@ -31,3 +31,11 @@ class ProductForm(FlaskForm, CKEditor):
 
 class ProductSkuForm(FlaskForm):
     submit = SubmitField('提交')
+
+
+class ProductCommentForm(FlaskForm):
+    nickname = StringField('昵称', validators=[DataRequired()])
+    rating = StringField('评分')
+    commentline = TextAreaField('评论')
+    sharelink = TextAreaField('分享链接')
+    submit = SubmitField('提交')
