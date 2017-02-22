@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import os
 from app import create_app,db
-from app.models import ProductCategory, SkuFeature, SkuOption, Product, ProductSku
+from app.models import ProductCategory, SkuFeature, SkuOption, Product, ProductSku, Inventory
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
-import logging
 
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -14,7 +13,7 @@ migrate = Migrate(app, db)
 
 def make_shell_context():
     return dict(app=app, db=db, ProductCategory=ProductCategory, SkuFeature=SkuFeature,
-                SkuOption=SkuOption, Product=Product, ProductSku=ProductSku)
+                SkuOption=SkuOption, Product=Product, ProductSku=ProductSku, Inventory=Inventory)
 
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)

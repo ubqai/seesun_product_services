@@ -1,4 +1,6 @@
 from . import db
+import datetime
+from functools import reduce
 
 
 class ProductCategory(db.Model):
@@ -9,7 +11,7 @@ class ProductCategory(db.Model):
     products = db.relationship('Product', backref='product_category')
 
     def __repr__(self):
-        return '<ProductCategory %r>' % self.name
+        return '<ProductCategory %r>' % self.to_json()
 
     def to_json(self):
         json_category = {
@@ -30,7 +32,7 @@ class SkuFeature(db.Model):
     sku_options = db.relationship('SkuOption', backref='sku_feature')
 
     def __repr__(self):
-        return '<SkuFeature %r>' % self.name
+        return '<SkuFeature %r>' % self.to_json()
 
     def to_json(self):
         json_feature = {
@@ -48,7 +50,7 @@ class SkuOption(db.Model):
     name = db.Column(db.String(64))
 
     def __repr__(self):
-        return '<SkuOption %r>' % self.name
+        return '<SkuOption %r>' % self.to_json()
 
     def to_json(self):
         json_option = {
@@ -86,6 +88,9 @@ class Product(db.Model):
     sku_options = db.relationship('SkuOption', secondary=products_and_skuoptions,
                                   backref=db.backref('products', lazy='dynamic'), lazy='dynamic')
 
+    def __repr__(self):
+        return '<Product %r>' % self.to_json()
+
     def to_json(self):
         json_product = {
             "product_id": self.id,
@@ -113,7 +118,6 @@ class ProductSku(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     code = db.Column(db.String(32), unique=True)
     price = db.Column(db.Float)
-    stocks = db.Column(db.Integer, default=0)
     barcode = db.Column(db.String)
     hscode = db.Column(db.String)
     weight = db.Column(db.Float)
@@ -121,6 +125,14 @@ class ProductSku(db.Model):
     thumbnail = db.Column(db.Text)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
+    inventories = db.relationship('Inventory', backref='product_sku')
+
+    def __repr__(self):
+        return '<ProductSku %r>' % self.to_json()
+
+    @property
+    def stocks(self):
+        return reduce(lambda x, y: x + y, [inv.stocks for inv in self.inventories], 0)
 
     def to_json(self):
         json_sku = {
@@ -135,4 +147,19 @@ class ProductSku(db.Model):
             "options": [{option.sku_feature.name: option.name} for option in self.sku_options]
         }
         return json_sku
+
+
+class Inventory(db.Model):
+    __tablename__ = 'inventories'
+    id = db.Column(db.Integer, primary_key=True)
+    product_sku_id = db.Column(db.Integer, db.ForeignKey('product_skus.id'))
+    type = db.Column(db.Integer, default=1)  # 1--公司库存，2--经销商库存
+    user_id = db.Column(db.Integer)  # 经销商id
+    user_name = db.Column(db.String(200))  # 经销商名称
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now())
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
+    production_date = db.Column(db.Date, default=datetime.datetime.today())
+    valid_until = db.Column(db.Date)
+    batch_no = db.Column(db.String(30))
+    stocks = db.Column(db.Integer, default=0)
 
