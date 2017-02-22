@@ -80,6 +80,7 @@ class Product(db.Model):
     description = db.Column(db.Text)
     product_image_links = db.Column(db.JSON)
     rating = db.Column(db.Float)
+    case_ids = db.Column(db.JSON, default=[])
 
     product_skus = db.relationship('ProductSku', backref='product')
     sku_options = db.relationship('SkuOption', secondary=products_and_skuoptions,
@@ -92,6 +93,7 @@ class Product(db.Model):
             "code": self.code,
             "description": self.description,
             "images": self.product_image_links,
+            "case_ids": self.case_ids,
             "options": [option.to_json() for option in self.sku_options]
         }
         return json_product
@@ -111,7 +113,7 @@ class ProductSku(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
     code = db.Column(db.String(32), unique=True)
     price = db.Column(db.Float)
-    stocks = db.Column(db.Integer)
+    stocks = db.Column(db.Integer, default=0)
     barcode = db.Column(db.String)
     hscode = db.Column(db.String)
     weight = db.Column(db.Float)

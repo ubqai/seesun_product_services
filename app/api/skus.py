@@ -31,7 +31,7 @@ def create_skus():
             product=product,
             code=code,
             price=sku_info.get("price"),
-            stocks=sku_info.get("stocks"),
+            stocks=0,
             barcode=sku_info.get("barcode"),
             hscode=sku_info.get("hscode"),
             weight=sku_info.get("weight"),
@@ -57,6 +57,68 @@ def create_skus():
 def get_skus(id):
     response = jsonify(
         Product.query.get_or_404(id).to_sku_json()
+    )
+    response.status_code = 200
+    return response
+
+
+# 修改产品sku
+@api.route("/product_skus/<int:id>/edit", methods=["PUT"])
+def update_sku(id):
+    if request.json is None:
+        return bad_request("not json request")
+    sku = ProductSku.query.get_or_404(id)
+    if isinstance(request.json.get('code'), str):
+        if ProductSku.query.filter_by(code=request.json.get('code')).first() is not None:
+            db.session.rollback()
+            raise ValidationError("%s sku code has existed" % request.json.get('code'), 400)
+        else:
+            sku.code = request.json.get('code')
+    if isinstance(request.json.get('barcode'), str):
+        sku.barcode = request.json.get('barcode')
+    if isinstance(request.json.get('hscode'), str):
+        sku.hscode = request.json.get('hscode')
+    if isinstance(request.json.get('weight'), str):
+        sku.weight = request.json.get('weight')
+    if isinstance(request.json.get('thumbnail'), str):
+        sku.thumbnail = request.json.get('thumbnail')
+    if isinstance(request.json.get('options_id'), list):
+        for sku_option in sku.sku_options.all():
+            sku.sku_options.remove(sku_option)
+        for option_id in request.json.get('options_id'):
+            sku_option = SkuOption.query.get_or_404(option_id)
+            sku.sku_options.append(sku_option)
+    db.session.add(sku)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
+
+
+# 删除产品sku
+@api.route("/product_skus/<int:id>", methods=["DELETE"])
+def delete_sku(id):
+    sku = ProductSku.query.get_or_404(id)
+    db.session.delete(sku)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
+
+
+# 根据sku_id获取sku
+@api.route("/product_skus/<int:id>", methods=["GET"])
+def get_sku(id):
+    response = jsonify(
+        ProductSku.query.get_or_404(id).to_json()
     )
     response.status_code = 200
     return response

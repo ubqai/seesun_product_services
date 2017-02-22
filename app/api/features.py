@@ -41,3 +41,22 @@ def get_feature(id):
     return response
 
 
+# 创建产品属性
+@api.route("/sku_features/<int:id>/edit", methods=['PUT'])
+def update_feature(id):
+    if request.json is None:
+        return bad_request("not json request")
+    feature = SkuFeature.query.get_or_404(id)
+    if isinstance(request.json.get('name'), str):
+        feature.name = request.json.get('name')
+    if isinstance(request.json.get('description'), str):
+        feature.description = request.json.get('description')
+    db.session.add(feature)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response

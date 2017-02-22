@@ -29,3 +29,23 @@ def create_option():
     )
     response.status_code = 201
     return response
+
+
+# 修改产品属性值
+@api.route("/sku_options/<int:id>/edit", methods=['PUT'])
+def update_option(id):
+    if request.json is None:
+        return bad_request("not json request")
+    if not isinstance(request.json.get('name'), str):
+        return bad_request("name params must be a str")
+    option = SkuOption.query.get_or_404(id)
+    option.name = request.json.get('name')
+    db.session.add(option)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response

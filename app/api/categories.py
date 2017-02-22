@@ -50,3 +50,23 @@ def get_categories():
     response.status_code = 200
     return response
 
+
+# 修改产品目录
+@api.route("/product_categories/<int:id>/edit", methods=['PUT'])
+def update_category(id):
+    if request.json is None:
+        return bad_request("not json request")
+    if request.json.get('category_name') is None:
+        return bad_request("category_name params is necessary")
+    current_app.logger.info("id %s", id)
+    category = ProductCategory.query.get_or_404(id)
+    category.name = request.json.get('category_name')
+    db.session.add(category)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
