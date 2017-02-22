@@ -38,3 +38,68 @@ def create_inventories():
     )
     response.status_code = 201
     return response
+
+
+# 根据sku id 获取 库存
+@api.route("/sku/<int:id>/inventories", methods=["GET"])
+def get_inventories(id):
+    sku = ProductSku.query.get_or_404(id)
+    response = jsonify(
+        [{"user_id": user[0], "user_name": user[1], "total": user[2], "batches":
+            [inv.to_json() for inv in Inventory.query.filter_by(user_id=user[0], user_name=user[1],
+                                                                product_sku_id=sku.id)]}
+         for user in sku.inv_group_by_user()]
+    )
+    response.status_code = 200
+    return response
+
+
+# 修改库存
+@api.route("/inventories/<int:id>/edit", methods=["PUT"])
+def update_inv(id):
+    if request.json is None:
+        return bad_request("not json request")
+    inv = Inventory.query.get_or_404(id)
+    if isinstance(request.json.get('production_date'), str):
+        inv.production_date = request.json.get('production_date')
+    if isinstance(request.json.get('valid_until'), str):
+        inv.valid_until = request.json.get('valid_until')
+    if isinstance(request.json.get('batch_no'), str):
+        inv.batch_no = request.json.get('batch_no')
+    if isinstance(request.json.get('stocks'), str):
+        inv.stocks = request.json.get('stocks')
+    db.session.add(inv)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
+
+
+# 删除库存
+@api.route("/inventories/<int:id>", methods=["DELETE"])
+def delete_inv(id):
+    inv = Inventory.query.get_or_404(id)
+    db.session.delete(inv)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
+
+
+# 根据id 获取 库存
+@api.route("/inventories/<int:id>", methods=["GET"])
+def get_inventory(id):
+    inv = Inventory.query.get_or_404(id)
+    response = jsonify(
+        inv.to_json()
+    )
+    response.status_code = 200
+    return response
