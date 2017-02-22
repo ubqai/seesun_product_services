@@ -144,3 +144,11 @@ class ProductComments(db.Model):
     rating = db.Column(db.String(32))
     sharing_image_links = db.Column(db.Text)
 
+    def to_json(self):
+        json_comment = {
+            "product_id": self.product_id,
+            "nick_name": self.user_nickname,
+            "comments": self.comment_line,
+            "rating": self.rating
+        }
+        return json_comment

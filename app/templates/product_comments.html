@@ -3,8 +3,16 @@
 
 {% block page_content %}
     <div class="page-header">
-        <h1>添加评论</h1>
+        <h1>{{product_name}} 已有评论</h1>
+        <ul>
+            {% for product_comment in product_comments %}
+                <li>产品id：{{ product_comment.product_id }}</li>
+                <li>用户昵称：{{ product_comment.user_nickname }}</li>
+                <li>用户评论：{{ product_comment.comment_line }}</li>
+            {% endfor %}
+        </ul>
     </div>
+    <h1>添加评论</h1>
     {{ wtf.quick_form(form) }}
 
 {% endblock %}

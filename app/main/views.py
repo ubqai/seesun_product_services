@@ -80,7 +80,9 @@ def sku_options():
 @main.route("/product_comments/<int:id>", methods=['GET', 'POST'])
 def product_comments(id):
     form = ProductCommentForm()
-    product_comment = ProductComments.query.all()
+    product_comments = ProductComments.query.filter_by(product_id=id)
+    product = Product.query.get_or_404(id)
+    product_name = product.name
     if form.validate_on_submit():
         product_comment = ProductComments(
             user_nickname=form.nickname.data,
@@ -92,7 +94,7 @@ def product_comments(id):
         db.session.add(product_comment)
         flash('创建成功')
         return redirect(url_for('main.products_manage'))
-    return render_template('product_comments.html', form=form, product_comment=product_comment)
+    return render_template('product_comments.html', form=form, product_comments=product_comments, product_name=product_name)
 
 
 @main.route("/sku_option_edit/<int:id>", methods=['GET', 'POST'])
