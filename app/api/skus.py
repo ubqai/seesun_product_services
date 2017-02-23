@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from .. import db
 from ..models import Product, SkuOption, ProductSku
 from . import api
@@ -67,6 +67,7 @@ def get_skus(id):
 def update_sku(id):
     if request.json is None:
         return bad_request("not json request")
+    current_app.logger.info(request.json)
     sku = ProductSku.query.get_or_404(id)
     if isinstance(request.json.get('code'), str):
         if ProductSku.query.filter_by(code=request.json.get('code')).first() is not None:
@@ -78,10 +79,12 @@ def update_sku(id):
         sku.barcode = request.json.get('barcode')
     if isinstance(request.json.get('hscode'), str):
         sku.hscode = request.json.get('hscode')
-    if isinstance(request.json.get('weight'), str):
+    if request.json.get('weight') is not None:
         sku.weight = request.json.get('weight')
     if isinstance(request.json.get('thumbnail'), str):
         sku.thumbnail = request.json.get('thumbnail')
+    if request.json.get('stocks_for_order') is not None:
+        sku.stocks_for_order += int(request.json.get('stocks_for_order'))
     if isinstance(request.json.get('options_id'), list):
         for sku_option in sku.sku_options.all():
             sku.sku_options.remove(sku_option)

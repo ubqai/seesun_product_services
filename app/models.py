@@ -148,6 +148,12 @@ class ProductSku(db.Model):
         }
         return json_sku
 
+    def inv_group_by_user(self):
+        inv_users_list = db.session.query(Inventory.user_id, Inventory.user_name,
+                                          db.func.sum(Inventory.stocks).label('total')).\
+            filter_by(product_sku_id=self.id).group_by(Inventory.user_id, Inventory.user_name).all()
+        return inv_users_list
+
 
 class Inventory(db.Model):
     __tablename__ = 'inventories'
@@ -162,4 +168,21 @@ class Inventory(db.Model):
     valid_until = db.Column(db.Date)
     batch_no = db.Column(db.String(30))
     stocks = db.Column(db.Integer, default=0)
+
+    def __repr__(self):
+        return '<Inventory %r>' % self.to_json()
+
+    def to_json(self):
+        json_inv = {
+            "inv_id": self.id,
+            "type": self.type,
+            "user_id": self.user_id,
+            "user_name": self.user_name,
+            "created_at": self.created_at.strftime("%Y-%m-%d"),
+            "production_date": self.production_date.strftime("%Y-%m-%d"),
+            "valid_until": self.valid_until.strftime("%Y-%m-%d"),
+            "batch_no": self.batch_no,
+            "stocks": self.stocks
+        }
+        return json_inv
 
