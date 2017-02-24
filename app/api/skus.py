@@ -31,7 +31,6 @@ def create_skus():
             product=product,
             code=code,
             price=sku_info.get("price"),
-            stocks=0,
             barcode=sku_info.get("barcode"),
             hscode=sku_info.get("hscode"),
             weight=sku_info.get("weight"),
