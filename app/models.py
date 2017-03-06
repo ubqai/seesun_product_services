@@ -148,10 +148,16 @@ class ProductSku(db.Model):
         }
         return json_sku
 
-    def inv_group_by_user(self):
-        inv_users_list = db.session.query(Inventory.user_id, Inventory.user_name,
-                                          db.func.sum(Inventory.stocks).label('total')).\
-            filter_by(product_sku_id=self.id).group_by(Inventory.user_id, Inventory.user_name).all()
+    def inv_group_by_user(self, user_id='default'):
+        if user_id == 'default':
+            inv_users_list = db.session.query(Inventory.user_id, Inventory.user_name,
+                                              db.func.sum(Inventory.stocks).label('total')).\
+                filter_by(product_sku_id=self.id).group_by(Inventory.user_id, Inventory.user_name).all()
+        else:
+            inv_users_list = db.session.query(Inventory.user_id, Inventory.user_name,
+                                              db.func.sum(Inventory.stocks).label('total')). \
+                filter_by(product_sku_id=self.id, user_id=user_id).\
+                group_by(Inventory.user_id, Inventory.user_name).all()
         return inv_users_list
 
 
@@ -168,6 +174,7 @@ class Inventory(db.Model):
     valid_until = db.Column(db.Date)
     batch_no = db.Column(db.String(30))
     stocks = db.Column(db.Integer, default=0)
+    share_stocks = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return '<Inventory %r>' % self.to_json()
@@ -182,7 +189,8 @@ class Inventory(db.Model):
             "production_date": self.production_date.strftime("%Y-%m-%d"),
             "valid_until": self.valid_until.strftime("%Y-%m-%d"),
             "batch_no": self.batch_no,
-            "stocks": self.stocks
+            "stocks": self.stocks,
+            "share_stocks": self.share_stocks
         }
         return json_inv
 
