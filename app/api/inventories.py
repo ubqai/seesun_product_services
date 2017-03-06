@@ -3,8 +3,6 @@ from .. import db
 from ..models import ProductSku, Inventory
 from . import api
 from .errors import bad_request
-import datetime
-from app.exceptions import ValidationError
 
 
 # 创建库存
@@ -52,6 +50,7 @@ def get_inventories(id):
     )
     response.status_code = 200
     return response
+
 
 # 根据sku id和user_id 获取 库存
 @api.route("/sku/<int:user_id>/<int:id>/inventories", methods=["GET"])
