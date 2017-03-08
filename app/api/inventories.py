@@ -80,8 +80,6 @@ def update_inv(id):
         inv.batch_no = request.json.get('batch_no')
     if isinstance(request.json.get('stocks'), str):
         inv.stocks = request.json.get('stocks')
-    if isinstance(request.json.get('share_stocks'), str):
-        inv.share_stocks = request.json.get('share_stocks')
     db.session.add(inv)
     db.session.commit()
     response = jsonify(

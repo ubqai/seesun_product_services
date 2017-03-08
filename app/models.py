@@ -174,7 +174,6 @@ class Inventory(db.Model):
     valid_until = db.Column(db.Date)
     batch_no = db.Column(db.String(30))
     stocks = db.Column(db.Integer, default=0)
-    share_stocks = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return '<Inventory %r>' % self.to_json()
@@ -189,8 +188,7 @@ class Inventory(db.Model):
             "production_date": self.production_date.strftime("%Y-%m-%d"),
             "valid_until": self.valid_until.strftime("%Y-%m-%d"),
             "batch_no": self.batch_no,
-            "stocks": self.stocks,
-            "share_stocks": self.share_stocks
+            "stocks": self.stocks
         }
         return json_inv
 

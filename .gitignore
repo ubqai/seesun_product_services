@@ -4,3 +4,4 @@ app/api/__pycache__
 app/main/__pycache__
 app/static/upload
 venv
+.idea
