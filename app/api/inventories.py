@@ -52,6 +52,20 @@ def get_inventories(id):
     return response
 
 
+# 根据sku id 获取 库存
+@api.route("/sku/<code>/inventories_by_code", methods=["GET"])
+def get_inventories_by_code(code):
+    sku = ProductSku.query.filter_by(code=code).first()
+    response = jsonify(
+        [{"user_id": user[0], "user_name": user[1], "total": user[2], "batches":
+            [inv.to_json() for inv in Inventory.query.filter_by(user_id=user[0], user_name=user[1],
+                                                                product_sku_id=sku.id)]}
+         for user in sku.inv_group_by_user()]
+    )
+    response.status_code = 200
+    return response
+
+
 # 根据sku id和user_id 获取 库存
 @api.route("/sku/<int:user_id>/<int:id>/inventories", methods=["GET"])
 def get_user_inventories(user_id, id):
@@ -78,6 +92,8 @@ def update_inv(id):
         inv.valid_until = request.json.get('valid_until')
     if isinstance(request.json.get('batch_no'), str):
         inv.batch_no = request.json.get('batch_no')
+    if isinstance(request.json.get('sub_stocks'), str):
+        inv.stocks -= int(request.json.get('sub_stocks'))
     if isinstance(request.json.get('stocks'), str):
         inv.stocks = request.json.get('stocks')
     db.session.add(inv)

@@ -186,8 +186,8 @@ class Inventory(db.Model):
             "user_id": self.user_id,
             "user_name": self.user_name,
             "created_at": self.created_at.strftime("%Y-%m-%d"),
-            "production_date": self.production_date.strftime("%Y-%m-%d"),
-            "valid_until": self.valid_until.strftime("%Y-%m-%d"),
+            "production_date": self.production_date.strftime("%Y-%m-%d") if self.production_date is not None else "",
+            "valid_until": self.valid_until.strftime("%Y-%m-%d") if self.valid_until is not None else "",
             "batch_no": self.batch_no,
             "stocks": self.stocks
         }

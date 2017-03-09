@@ -101,6 +101,46 @@ def update_sku(id):
     return response
 
 
+# 修改产品sku
+@api.route("/product_skus/<code>/edit_by_code", methods=["PUT"])
+def update_sku_by_code(code):
+    if request.json is None:
+        return bad_request("not json request")
+    current_app.logger.info(request.json)
+    sku = ProductSku.query.filter_by(code=code).first()
+    if isinstance(request.json.get('code'), str):
+        if ProductSku.query.filter_by(code=request.json.get('code')).first() is not None:
+            db.session.rollback()
+            raise ValidationError("%s sku code has existed" % request.json.get('code'), 400)
+        else:
+            sku.code = request.json.get('code')
+    if isinstance(request.json.get('barcode'), str):
+        sku.barcode = request.json.get('barcode')
+    if isinstance(request.json.get('hscode'), str):
+        sku.hscode = request.json.get('hscode')
+    if request.json.get('weight') is not None:
+        sku.weight = request.json.get('weight')
+    if isinstance(request.json.get('thumbnail'), str):
+        sku.thumbnail = request.json.get('thumbnail')
+    if request.json.get('stocks_for_order') is not None:
+        sku.stocks_for_order += int(request.json.get('stocks_for_order'))
+    if isinstance(request.json.get('options_id'), list):
+        for sku_option in sku.sku_options.all():
+            sku.sku_options.remove(sku_option)
+        for option_id in request.json.get('options_id'):
+            sku_option = SkuOption.query.get_or_404(option_id)
+            sku.sku_options.append(sku_option)
+    db.session.add(sku)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
+
+
 # 删除产品sku
 @api.route("/product_skus/<int:id>", methods=["DELETE"])
 def delete_sku(id):
