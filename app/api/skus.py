@@ -1,6 +1,6 @@
 from flask import jsonify, request, current_app
 from .. import db
-from ..models import Product, SkuOption, ProductSku
+from ..models import Product, SkuOption, ProductSku, Inventory
 from . import api
 from .errors import bad_request
 import datetime
@@ -101,36 +101,27 @@ def update_sku(id):
     return response
 
 
-# 修改产品sku
-@api.route("/product_skus/<code>/edit_by_code", methods=["PUT"])
-def update_sku_by_code(code):
+# 生成合同时修改产品sku的stocks_for_order及批次中的库存
+@api.route("/product_skus/edit_by_code", methods=["PUT"])
+def update_sku_by_code():
     if request.json is None:
         return bad_request("not json request")
+    if not isinstance(request.json.get('sku_infos'), list):
+        return bad_request("sku_infos params must be a list")
     current_app.logger.info(request.json)
-    sku = ProductSku.query.filter_by(code=code).first()
-    if isinstance(request.json.get('code'), str):
-        if ProductSku.query.filter_by(code=request.json.get('code')).first() is not None:
-            db.session.rollback()
-            raise ValidationError("%s sku code has existed" % request.json.get('code'), 400)
-        else:
-            sku.code = request.json.get('code')
-    if isinstance(request.json.get('barcode'), str):
-        sku.barcode = request.json.get('barcode')
-    if isinstance(request.json.get('hscode'), str):
-        sku.hscode = request.json.get('hscode')
-    if request.json.get('weight') is not None:
-        sku.weight = request.json.get('weight')
-    if isinstance(request.json.get('thumbnail'), str):
-        sku.thumbnail = request.json.get('thumbnail')
-    if request.json.get('stocks_for_order') is not None:
-        sku.stocks_for_order += int(request.json.get('stocks_for_order'))
-    if isinstance(request.json.get('options_id'), list):
-        for sku_option in sku.sku_options.all():
-            sku.sku_options.remove(sku_option)
-        for option_id in request.json.get('options_id'):
-            sku_option = SkuOption.query.get_or_404(option_id)
-            sku.sku_options.append(sku_option)
-    db.session.add(sku)
+
+    for sku_info in request.json.get('sku_infos'):
+        code = sku_info.get("code")
+        sku = ProductSku.query.filter_by(code=code).first()
+        if sku_info.get('stocks_for_order') is not None:
+            sku.stocks_for_order += int(sku_info.get('stocks_for_order'))
+
+        if isinstance(sku_info.get('batches'), list):
+            for batch in sku_info.get('batches'):
+                inv = Inventory.query.get_or_404(batch['inv_id'])
+                inv.stocks -= int(batch['sub_stocks'])
+                db.session.add(inv)
+        db.session.add(sku)
     db.session.commit()
     response = jsonify(
         {
