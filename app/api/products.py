@@ -28,6 +28,8 @@ def create_product():
         name=request.json.get('product_info').get('name'),
         code=code,
         description=request.json.get('product_info').get('description'),
+        length=request.json.get('product_info').get('length'),
+        width=request.json.get('product_info').get('width'),
         case_ids=request.json.get('product_info').get('case_ids'),
         product_category=category,
         product_image_links=request.json.get('product_info').get('product_image_links')
@@ -81,6 +83,10 @@ def update_product(id):
             product.code = request.json.get('code')
     if isinstance(request.json.get('description'), str):
         product.description = request.json.get('description')
+    if request.json.get('length') is not None:
+        product.length = request.json.get('length')
+    if request.json.get('width') is not None:
+        product.width = request.json.get('width')
     if isinstance(request.json.get('case_ids'), list):
         product.case_ids = request.json.get('case_ids')
     if isinstance(request.json.get('product_image_links'), list):

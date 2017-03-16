@@ -80,6 +80,8 @@ class Product(db.Model):
     name = db.Column(db.String(64))
     code = db.Column(db.String(32), unique=True)
     description = db.Column(db.Text)
+    length = db.Column(db.Float, default=0)
+    width = db.Column(db.Float, default=0)
     product_image_links = db.Column(db.JSON)
     rating = db.Column(db.Float)
     case_ids = db.Column(db.JSON, default=[])
@@ -97,6 +99,8 @@ class Product(db.Model):
             "name": self.name,
             "code": self.code,
             "description": self.description,
+            "length": 1 if self.length is None or self.length == 0 else self.length,
+            "width": 1 if self.width is None or self.width == 0 else self.width,
             "images": self.product_image_links,
             "case_ids": self.case_ids,
             "options": [option.to_json() for option in self.sku_options]
@@ -145,6 +149,8 @@ class ProductSku(db.Model):
             "hscode": self.hscode,
             "weight": self.weight,
             "thumbnail": self.thumbnail,
+            "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
+            "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
             "options": [{option.sku_feature.name: option.name} for option in self.sku_options]
         }
         return json_sku
