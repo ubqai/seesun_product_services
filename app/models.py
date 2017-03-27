@@ -191,6 +191,7 @@ class Inventory(db.Model):
     valid_until = db.Column(db.Date)
     batch_no = db.Column(db.String(30))
     stocks = db.Column(db.Float, default=0)
+    price = db.Column(db.Float)
 
     def __repr__(self):
         return '<Inventory %r>' % self.to_json()
@@ -205,7 +206,8 @@ class Inventory(db.Model):
             "production_date": self.production_date.strftime("%Y-%m-%d") if self.production_date is not None else "",
             "valid_until": self.valid_until.strftime("%Y-%m-%d") if self.valid_until is not None else "",
             "batch_no": self.batch_no,
-            "stocks": self.stocks
+            "stocks": self.stocks,
+            "price": self.price
         }
         return json_inv
 

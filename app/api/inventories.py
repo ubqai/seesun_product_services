@@ -24,6 +24,7 @@ def create_inventories():
                 production_date=inv.get('production_date'),
                 batch_no=inv.get('batch_no'),
                 stocks=inv.get('stocks'),
+                price=None if inv.get('price') == "" else inv.get('price'),
                 product_sku=sku
             )
             db.session.add(inventory)
@@ -95,6 +96,8 @@ def update_inv(id):
         inv.stocks -= int(request.json.get('sub_stocks'))
     if isinstance(request.json.get('stocks'), str):
         inv.stocks = request.json.get('stocks')
+    if isinstance(request.json.get('price'), str):
+        inv.price = None if request.json.get('price')=="" else request.json.get('price')
     db.session.add(inv)
     db.session.commit()
     response = jsonify(
