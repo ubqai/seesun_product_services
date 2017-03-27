@@ -125,7 +125,7 @@ class ProductSku(db.Model):
     barcode = db.Column(db.String)
     hscode = db.Column(db.String)
     weight = db.Column(db.Float)
-    stocks_for_order = db.Column(db.Integer, default=0)
+    stocks_for_order = db.Column(db.Float, default=0)
     thumbnail = db.Column(db.Text)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
@@ -138,12 +138,22 @@ class ProductSku(db.Model):
     def stocks(self):
         return reduce(lambda x, y: x + y, [inv.stocks for inv in self.inventories], 0)
 
+    @property
+    def normal_stocks(self):
+        return reduce(lambda x, y: x + y, [inv.stocks for inv in [inv for inv in self.inventories if inv.type == 1]], 0)
+
+    @property
+    def tailory_stock(self):
+        return reduce(lambda x, y: x + y, [inv.stocks for inv in [inv for inv in self.inventories if inv.type == 2]], 0)
+
     def to_json(self):
         json_sku = {
             "sku_id": self.id,
             "code": self.code,
             "price": self.price,
             "stocks": self.stocks,
+            "normal_stocks": self.normal_stocks,
+            "tailory_stock": self.tailory_stock,
             "stocks_for_order": self.stocks_for_order,
             "barcode": self.barcode,
             "hscode": self.hscode,
@@ -172,15 +182,15 @@ class Inventory(db.Model):
     __tablename__ = 'inventories'
     id = db.Column(db.Integer, primary_key=True)
     product_sku_id = db.Column(db.Integer, db.ForeignKey('product_skus.id'))
-    type = db.Column(db.Integer, default=1)  # 1--公司库存，2--经销商库存
-    user_id = db.Column(db.Integer)  # 经销商id
+    type = db.Column(db.Integer, default=1)  # 1--公司正常库存，2--公司和经销商工程剩余库存
+    user_id = db.Column(db.Integer)  # 经销商id（公司id=0）
     user_name = db.Column(db.String(200))  # 经销商名称
     created_at = db.Column(db.DateTime, default=datetime.datetime.now())
     updated_at = db.Column(db.DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
     production_date = db.Column(db.Date, default=datetime.datetime.today())
     valid_until = db.Column(db.Date)
     batch_no = db.Column(db.String(30))
-    stocks = db.Column(db.Integer, default=0)
+    stocks = db.Column(db.Float, default=0)
 
     def __repr__(self):
         return '<Inventory %r>' % self.to_json()

@@ -22,7 +22,6 @@ def create_inventories():
                 user_id=inv.get('user_id'),
                 user_name=inv.get('user_name'),
                 production_date=inv.get('production_date'),
-                valid_until=inv.get('valid_until'),
                 batch_no=inv.get('batch_no'),
                 stocks=inv.get('stocks'),
                 product_sku=sku
@@ -52,7 +51,7 @@ def get_inventories(id):
     return response
 
 
-# 根据sku id 获取 库存
+# 根据sku code 获取 库存
 @api.route("/sku/<code>/inventories_by_code", methods=["GET"])
 def get_inventories_by_code(code):
     sku = ProductSku.query.filter_by(code=code).first()
@@ -67,13 +66,13 @@ def get_inventories_by_code(code):
 
 
 # 根据sku id和user_id 获取 库存
-@api.route("/sku/<int:user_id>/<int:id>/inventories", methods=["GET"])
-def get_user_inventories(user_id, id):
+@api.route("/sku/<int:user_id>/<int:id>/<inv_type>/inventories", methods=["GET"])
+def get_user_inventories(user_id, id, inv_type=2):
     sku = ProductSku.query.get_or_404(id)
     response = jsonify(
         [{"user_id": user[0], "user_name": user[1], "total": user[2], "batches":
             [inv.to_json() for inv in Inventory.query.filter_by(user_id=user[0], user_name=user[1],
-                                                                product_sku_id=sku.id)]}
+                                                                product_sku_id=sku.id, type=inv_type)]}
          for user in sku.inv_group_by_user(user_id=user_id)]
     )
     response.status_code = 200
