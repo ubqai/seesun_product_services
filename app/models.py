@@ -85,6 +85,7 @@ class Product(db.Model):
     product_image_links = db.Column(db.JSON)
     rating = db.Column(db.Float)
     case_ids = db.Column(db.JSON, default=[])
+    isvalid = db.Column(db.String(10), default='YES')
 
     product_skus = db.relationship('ProductSku', backref='product')
     sku_options = db.relationship('SkuOption', secondary=products_and_skuoptions,
@@ -103,6 +104,7 @@ class Product(db.Model):
             "width": 1 if self.width is None or self.width == 0 else self.width,
             "images": self.product_image_links,
             "case_ids": self.case_ids,
+            "isvalid": self.isvalid,
             "options": [option.to_json() for option in self.sku_options]
         }
         return json_product
@@ -127,6 +129,7 @@ class ProductSku(db.Model):
     weight = db.Column(db.Float)
     stocks_for_order = db.Column(db.Float, default=0)
     thumbnail = db.Column(db.Text)
+    isvalid = db.Column(db.String(10), default='YES')
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
     inventories = db.relationship('Inventory', backref='product_sku')
@@ -159,6 +162,7 @@ class ProductSku(db.Model):
             "hscode": self.hscode,
             "weight": self.weight,
             "thumbnail": self.thumbnail,
+            "isvalid": self.isvalid,
             "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
             "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
             "options": [{option.sku_feature.name: option.name} for option in self.sku_options]

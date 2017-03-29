@@ -91,6 +91,11 @@ def update_product(id):
         product.case_ids = request.json.get('case_ids')
     if isinstance(request.json.get('product_image_links'), list):
         product.product_image_links = request.json.get('product_image_links')
+    if isinstance(request.json.get('isvalid'), str):
+        if request.json.get('isvalid') != "YES" and request.json.get('isvalid') != "NO":
+            db.session.rollback()
+            raise ValidationError("%s isvalid enum must be YES or NO" % request.json.get('isvalid'), 400)
+        product.isvalid = request.json.get('isvalid')
     if isinstance(request.json.get('options_id'), list):
         for sku_option in product.sku_options.all():
             product.sku_options.remove(sku_option)

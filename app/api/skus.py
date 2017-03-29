@@ -64,6 +64,7 @@ def get_skus(id):
 # 修改产品sku
 @api.route("/product_skus/<int:id>/edit", methods=["PUT"])
 def update_sku(id):
+    current_app.logger.info(request.json)
     if request.json is None:
         return bad_request("not json request")
     current_app.logger.info(request.json)
@@ -82,6 +83,11 @@ def update_sku(id):
         sku.weight = request.json.get('weight')
     if isinstance(request.json.get('thumbnail'), str):
         sku.thumbnail = request.json.get('thumbnail')
+    if isinstance(request.json.get('isvalid'), str):
+        if request.json.get('isvalid') != "YES" and request.json.get('isvalid') != "NO":
+            db.session.rollback()
+            raise ValidationError("%s isvalid enum must be YES or NO" % request.json.get('isvalid'), 400)
+        sku.isvalid = request.json.get('isvalid')
     if request.json.get('stocks_for_order') is not None:
         sku.stocks_for_order += int(request.json.get('stocks_for_order'))
     if isinstance(request.json.get('options_id'), list):
