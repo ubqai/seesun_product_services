@@ -45,7 +45,7 @@ def get_category(id):
 @api.route("/product_categories", methods=['GET'])
 def get_categories():
     response = jsonify(
-        [category.to_json() for category in ProductCategory.query.all()]
+        [category.to_json() for category in ProductCategory.query.order_by(ProductCategory.created_at.desc()).all()]
     )
     response.status_code = 200
     return response

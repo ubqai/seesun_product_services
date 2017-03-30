@@ -7,8 +7,10 @@ class ProductCategory(db.Model):
     __tablename__ = 'product_categories'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     sku_features = db.relationship('SkuFeature', backref='product_category')
-    products = db.relationship('Product', backref='product_category')
+    products = db.relationship('Product', backref='product_category', order_by='Product.created_at.desc()')
 
     def __repr__(self):
         return '<ProductCategory %r>' % self.to_json()
@@ -86,8 +88,10 @@ class Product(db.Model):
     rating = db.Column(db.Float)
     case_ids = db.Column(db.JSON, default=[])
     isvalid = db.Column(db.String(10), default='YES')
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
-    product_skus = db.relationship('ProductSku', backref='product')
+    product_skus = db.relationship('ProductSku', backref='product', order_by='ProductSku.created_at.desc()')
     sku_options = db.relationship('SkuOption', secondary=products_and_skuoptions,
                                   backref=db.backref('products', lazy='dynamic'), lazy='dynamic')
 
@@ -130,6 +134,8 @@ class ProductSku(db.Model):
     stocks_for_order = db.Column(db.Float, default=0)
     thumbnail = db.Column(db.Text)
     isvalid = db.Column(db.String(10), default='YES')
+    created_at = db.Column(db.DateTime, default=datetime.datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
                                   backref=db.backref('product_skus', lazy='dynamic'), lazy='dynamic')
     inventories = db.relationship('Inventory', backref='product_sku')
