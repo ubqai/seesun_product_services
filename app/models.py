@@ -9,7 +9,7 @@ class ProductCategory(db.Model):
     name = db.Column(db.String(64), unique=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
-    sku_features = db.relationship('SkuFeature', backref='product_category')
+    # sku_features = db.relationship('SkuFeature', backref='product_category') 取消属性与产品目录关系
     products = db.relationship('Product', backref='product_category', order_by='Product.created_at.desc()')
 
     def __repr__(self):
@@ -18,8 +18,8 @@ class ProductCategory(db.Model):
     def to_json(self):
         json_category = {
             "category_id": self.id,
-            "category_name": self.name,
-            "features": [feature.to_json() for feature in self.sku_features]
+            "category_name": self.name
+            # "features": [feature.to_json() for feature in self.sku_features] 取消属性与产品目录关系
         }
         return json_category
 
@@ -27,7 +27,7 @@ class ProductCategory(db.Model):
 class SkuFeature(db.Model):
     __tablename__ = 'sku_features'
     id = db.Column(db.Integer, primary_key=True)
-    product_category_id = db.Column(db.Integer, db.ForeignKey('product_categories.id'))
+    # product_category_id = db.Column(db.Integer, db.ForeignKey('product_categories.id')) 取消属性与产品目录关系
     name = db.Column(db.String(64))
     description = db.Column(db.Text)
     sku_feature_type = db.Column(db.String)

@@ -31,7 +31,7 @@ def create_category():
     return response
 
 
-# 获取产品目录，及其下属的属性、属性值
+# 获取产品目录
 @api.route("/product_categories/<int:id>", methods=['GET'])
 def get_category(id):
     response = jsonify(
@@ -41,7 +41,7 @@ def get_category(id):
     return response
 
 
-# 获取所有产品目录，及其下属的属性、属性值
+# 获取所有产品目录
 @api.route("/product_categories", methods=['GET'])
 def get_categories():
     response = jsonify(
