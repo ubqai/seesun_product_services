@@ -175,6 +175,28 @@ class ProductSku(db.Model):
         }
         return json_sku
 
+    def to_search_json(self):
+        json_sku = {
+            "sku_id": self.id,
+            "code": self.code,
+            "price": self.price,
+            "stocks": self.stocks,
+            "normal_stocks": self.normal_stocks,
+            "tailory_stock": self.tailory_stock,
+            "stocks_for_order": self.stocks_for_order,
+            "barcode": self.barcode,
+            "hscode": self.hscode,
+            "weight": self.weight,
+            "thumbnail": self.thumbnail,
+            "isvalid": self.isvalid,
+            "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
+            "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
+            "options": [{option.sku_feature.name: option.name} for option in self.sku_options],
+            "product_info": self.product.to_json(),
+            "category_info": self.product.product_category.to_json()
+        }
+        return json_sku
+
     def inv_group_by_user(self, user_id='default'):
         if user_id == 'default':
             inv_users_list = db.session.query(Inventory.user_id, Inventory.user_name,

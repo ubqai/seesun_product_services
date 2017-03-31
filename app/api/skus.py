@@ -161,3 +161,22 @@ def get_sku(id):
     )
     response.status_code = 200
     return response
+
+
+@api.route("/product_skus/search", methods=["POST"])
+def search_skus():
+    if request.json is None:
+        return bad_request("not json request")
+    if request.json.get('option_ids') is None:
+        return bad_request("option_ids params is necessary")
+    if not isinstance(request.json.get('option_ids'), list):
+        return bad_request("option_ids params must be a list")
+    skus = []
+    for sku in ProductSku.query.all():
+        if set([SkuOption.query.get_or_404(option_id) for option_id in request.json.get('option_ids')]).issubset(set(sku.sku_options.all())):
+            skus.append(sku)
+    response = jsonify(
+        [sku.to_search_json() for sku in skus]
+    )
+    response.status_code = 200
+    return response
