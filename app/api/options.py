@@ -57,7 +57,7 @@ def update_option(id):
 def delete_option(id):
     option = SkuOption.query.get_or_404(id)
     if option.is_used():
-        raise ValidationError("sku feature has been used", 400)
+        raise ValidationError("sku option has been used", 400)
     db.session.delete(option)
     db.session.commit()
     response = jsonify(
