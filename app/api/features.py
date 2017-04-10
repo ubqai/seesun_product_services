@@ -1,8 +1,9 @@
 from flask import jsonify, request
 from .. import db
-from ..models import ProductCategory, SkuFeature
+from ..models import SkuFeature
 from . import api
 from .errors import bad_request
+from app.exceptions import ValidationError
 
 
 # 创建产品属性
@@ -37,6 +38,25 @@ def create_feature():
 def get_feature(id):
     feature = SkuFeature.query.get_or_404(id)
     response = jsonify(feature.to_json())
+    response.status_code = 200
+    return response
+
+
+# 删除产品属性
+@api.route("/sku_feature/<int:id>", methods=['DELETE'])
+def delete_feature(id):
+    feature = SkuFeature.query.get_or_404(id)
+    if feature.is_used():
+        raise ValidationError("sku feature has been used", 400)
+    for option in feature.sku_options:
+        db.session.delete(option)
+    db.session.delete(feature)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
     response.status_code = 200
     return response
 

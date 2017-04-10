@@ -3,6 +3,7 @@ from .. import db
 from ..models import SkuFeature, SkuOption
 from . import api
 from .errors import bad_request
+from app.exceptions import ValidationError
 
 
 # 创建产品属性值
@@ -41,6 +42,23 @@ def update_option(id):
     option = SkuOption.query.get_or_404(id)
     option.name = request.json.get('name')
     db.session.add(option)
+    db.session.commit()
+    response = jsonify(
+        {
+            'status': "success"
+        }
+    )
+    response.status_code = 200
+    return response
+
+
+# 删除产品属性
+@api.route("/sku_option/<int:id>", methods=['DELETE'])
+def delete_option(id):
+    option = SkuOption.query.get_or_404(id)
+    if option.is_used():
+        raise ValidationError("sku feature has been used", 400)
+    db.session.delete(option)
     db.session.commit()
     response = jsonify(
         {

@@ -40,9 +40,16 @@ class SkuFeature(db.Model):
         json_feature = {
             "feature_id": self.id,
             "feature_name": self.name,
+            "is_used": self.is_used(),
             "options": [option.to_json() for option in self.sku_options]
         }
         return json_feature
+
+    def is_used(self):
+        for option in self.sku_options:
+            if option.is_used():
+                return True
+        return False
 
 
 class SkuOption(db.Model):
@@ -58,9 +65,18 @@ class SkuOption(db.Model):
         json_option = {
             "option_id": self.id,
             "option_name": self.name,
+            "is_used": self.is_used(),
             "feature_name": self.sku_feature.name
         }
         return json_option
+
+    def is_used(self):
+        prt = db.session.query(Product).join(Product.sku_options).filter(SkuOption.id == self.id).first()
+        sku = db.session.query(ProductSku).join(ProductSku.sku_options).filter(SkuOption.id == self.id).first()
+        if prt is None and sku is None:
+            return False
+        else:
+            return True
 
 products_and_skuoptions = db.Table(
     'products_and_skuoptions',
