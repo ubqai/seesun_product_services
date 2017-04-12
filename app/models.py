@@ -98,8 +98,8 @@ class Product(db.Model):
     name = db.Column(db.String(64))
     code = db.Column(db.String(32), unique=True)
     description = db.Column(db.Text)
-    length = db.Column(db.Float, default=0)
-    width = db.Column(db.Float, default=0)
+    length = db.Column(db.String(256))
+    width = db.Column(db.String(256))
     product_image_links = db.Column(db.JSON)
     rating = db.Column(db.Float)
     case_ids = db.Column(db.JSON, default=[])
@@ -150,6 +150,8 @@ class ProductSku(db.Model):
     stocks_for_order = db.Column(db.Float, default=0)
     thumbnail = db.Column(db.Text)
     isvalid = db.Column(db.String(10), default='YES')
+    name = db.Column(db.String(256))
+    memo = db.Column(db.String(256))
     created_at = db.Column(db.DateTime, default=datetime.datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
     sku_options = db.relationship('SkuOption', secondary=products_sku_options,
@@ -185,6 +187,8 @@ class ProductSku(db.Model):
             "weight": self.weight,
             "thumbnail": self.thumbnail,
             "isvalid": self.isvalid,
+            "name": self.name,
+            "memo": self.memo,
             "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
             "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
             "options": [{option.sku_feature.name: option.name} for option in self.sku_options]
@@ -205,6 +209,8 @@ class ProductSku(db.Model):
             "weight": self.weight,
             "thumbnail": self.thumbnail,
             "isvalid": self.isvalid,
+            "name": self.name,
+            "memo": self.memo,
             "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
             "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
             "options": [{option.sku_feature.name: option.name} for option in self.sku_options],

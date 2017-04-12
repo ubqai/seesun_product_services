@@ -35,6 +35,8 @@ def create_skus():
             hscode=sku_info.get("hscode"),
             weight=sku_info.get("weight"),
             thumbnail=sku_info.get("thumbnail"),
+            name=sku_info.get("name"),
+            memo=sku_info.get("memo"),
             stocks_for_order=0
         )
         for option_id in sku_info.get('options_id'):
@@ -83,6 +85,10 @@ def update_sku(id):
         sku.weight = request.json.get('weight')
     if isinstance(request.json.get('thumbnail'), str):
         sku.thumbnail = request.json.get('thumbnail')
+    if isinstance(request.json.get('name'), str):
+        sku.name = request.json.get('name')
+    if isinstance(request.json.get('memo'), str):
+        sku.memo = request.json.get('memo')
     if isinstance(request.json.get('isvalid'), str):
         if request.json.get('isvalid') != "YES" and request.json.get('isvalid') != "NO":
             db.session.rollback()
