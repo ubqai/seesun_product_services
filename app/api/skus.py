@@ -178,10 +178,26 @@ def search_skus():
     if not isinstance(request.json.get('option_ids'), list):
         return bad_request("option_ids params must be a list")
 
-    response = jsonify(
-        [sku.to_search_json() for sku in ProductSku.query.all() if
-         set([SkuOption.query.get_or_404(option_id) for option_id in request.json.get('option_ids')]).issubset(
-             set(sku.sku_options.all()))]
+    bq = db.session.query(ProductSku)
+    for option_id in request.json.get('option_ids'):
+        bq = bq.from_self().join(ProductSku.sku_options).filter(SkuOption.id == option_id)
+    total_count = bq.count()
+    page_size = int(request.json.get('page_size', 20))
+    page_index = int(request.json.get('page', 1))
+    has_prev = False
+    has_next = False
+    if page_index > 1:
+        has_prev = True
+    if page_size*page_index < total_count:
+        has_next = True
+
+    response = jsonify({
+        "skus": [sku.to_search_json() for sku in bq.offset(page_size*(page_index-1)).limit(page_size)],
+        "has_prev": has_prev,
+        "has_next": has_next,
+        "page_size": page_size,
+        "page": page_index
+        }
     )
     response.status_code = 200
     return response
