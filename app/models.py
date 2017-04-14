@@ -124,8 +124,8 @@ class Product(db.Model):
             "width": 1 if self.width is None or self.width == 0 else self.width,
             "images": self.product_image_links,
             "case_ids": self.case_ids,
-            "isvalid": self.isvalid,
-            "options": [option.to_json() for option in self.sku_options]
+            "isvalid": self.isvalid
+            # "options": [option.to_json() for option in self.sku_options]
         }
         return json_product
 
@@ -214,16 +214,7 @@ class ProductSku(db.Model):
             "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
             "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
             "options": [{option.sku_feature.name: option.name} for option in self.sku_options],
-            "product_info": {
-                "product_id": self.product.id,
-                "name": self.product.name,
-                "code": self.product.code,
-                "description": self.product.description,
-                "length": 1 if self.product.length is None or self.product.length == 0 else self.product.length,
-                "width": 1 if self.product.width is None or self.product.width == 0 else self.product.width,
-                "images": self.product.product_image_links,
-                "case_ids": self.product.case_ids,
-                "isvalid": self.product.isvalid},
+            "product_info": self.product.to_json(),
             "category_info": self.product.product_category.to_json()
         }
         return json_sku
