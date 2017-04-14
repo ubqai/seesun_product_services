@@ -182,8 +182,8 @@ def search_skus():
     for option_id in request.json.get('option_ids'):
         bq = bq.from_self().join(ProductSku.sku_options).filter(SkuOption.id == option_id)
     total_count = bq.count()
-    page_size = int(request.json.get('page_size', 20))
-    page_index = int(request.json.get('page', 1))
+    page_size = int(request.json.get('page_size', '20'))
+    page_index = int(request.json.get('page', '1'))
     has_prev = False
     has_next = False
     if page_index > 1:
