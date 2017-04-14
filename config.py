@@ -6,6 +6,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_POOL_TIMEOUT = 1000
+    SQLALCHEMY_POOL_SIZE = 20
     UPLOADED_IMAGES_DEST = 'app/static/images/products'
     UPLOADED_IMAGES_URL = '/app/static/images/products'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
