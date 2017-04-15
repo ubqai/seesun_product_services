@@ -129,6 +129,12 @@ class Product(db.Model):
         }
         return json_product
 
+    def to_option_json(self):
+        json_options = {
+            "options": [option.to_json() for option in self.sku_options]
+        }
+        return json_options
+
     def to_sku_json(self):
         json_skus = {
             "product_id": self.id,

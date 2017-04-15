@@ -127,3 +127,13 @@ def delete_product(id):
     )
     response.status_code = 200
     return response
+
+
+# 获取产品的属性
+@api.route("/product/<int:id>/options", methods=["GET"])
+def get_product_options(id):
+    response = jsonify(
+        Product.query.get_or_404(id).to_option_json()
+    )
+    response.status_code = 200
+    return response
