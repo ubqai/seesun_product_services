@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from .. import db
+from .. import db, cache
 from ..models import SkuFeature
 from . import api
 from .errors import bad_request
@@ -24,6 +24,8 @@ def create_feature():
         )
         db.session.add(feature)
     db.session.commit()
+    cache.delete_memoized(get_features)
+    # cache.delete_memoized(get_feature)
     response = jsonify(
         {
             'status': "success"
@@ -35,6 +37,7 @@ def create_feature():
 
 # 获取产品属性信息
 @api.route("/sku_feature/<int:id>", methods=['GET'])
+@cache.memoize(720000)
 def get_feature(id):
     feature = SkuFeature.query.get_or_404(id)
     response = jsonify(feature.to_json())
@@ -52,6 +55,8 @@ def delete_feature(id):
         db.session.delete(option)
     db.session.delete(feature)
     db.session.commit()
+    cache.delete_memoized(get_features)
+    cache.delete_memoized(get_feature, id)
     response = jsonify(
         {
             'status': "success"
@@ -73,6 +78,8 @@ def update_feature(id):
         feature.description = request.json.get('description')
     db.session.add(feature)
     db.session.commit()
+    cache.delete_memoized(get_features)
+    cache.delete_memoized(get_feature, id)
     response = jsonify(
         {
             'status': "success"
@@ -84,6 +91,7 @@ def update_feature(id):
 
 # 获取产品属性信息
 @api.route("/sku_features", methods=['GET'])
+@cache.memoize(720000)
 def get_features():
     response = jsonify([feature.to_json() for feature in SkuFeature.query.all()])
     response.status_code = 200

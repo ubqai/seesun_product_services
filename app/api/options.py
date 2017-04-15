@@ -1,9 +1,10 @@
 from flask import jsonify, request
-from .. import db
+from .. import db, cache
 from ..models import SkuFeature, SkuOption
 from . import api
 from .errors import bad_request
 from app.exceptions import ValidationError
+from .features import get_feature, get_features
 
 
 # 创建产品属性值
@@ -23,6 +24,8 @@ def create_option():
         )
         db.session.add(option)
     db.session.commit()
+    cache.delete_memoized(get_features)
+    cache.delete_memoized(get_feature, feature.id)
     response = jsonify(
         {
             'status': "success"
@@ -40,9 +43,12 @@ def update_option(id):
     if not isinstance(request.json.get('name'), str):
         return bad_request("name params must be a str")
     option = SkuOption.query.get_or_404(id)
+    feature_id = option.sku_feature.id
     option.name = request.json.get('name')
     db.session.add(option)
     db.session.commit()
+    cache.delete_memoized(get_features)
+    cache.delete_memoized(get_feature, feature_id)
     response = jsonify(
         {
             'status': "success"
@@ -56,10 +62,13 @@ def update_option(id):
 @api.route("/sku_option/<int:id>", methods=['DELETE'])
 def delete_option(id):
     option = SkuOption.query.get_or_404(id)
+    feature_id = option.sku_feature.id
     if option.is_used():
         raise ValidationError("sku option has been used", 400)
     db.session.delete(option)
     db.session.commit()
+    cache.delete_memoized(get_features)
+    cache.delete_memoized(get_feature, feature_id)
     response = jsonify(
         {
             'status': "success"

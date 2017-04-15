@@ -3,10 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_uploads import UploadSet, IMAGES, configure_uploads
 from config import config
+from flask_cache import Cache
 
 uploaded_images = UploadSet('images', IMAGES)
 db = SQLAlchemy()
 bootstrap = Bootstrap()
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 
 def create_app(config_name):
@@ -15,6 +17,7 @@ def create_app(config_name):
     config[config_name].init_app(app)
     bootstrap.init_app(app)
     db.init_app(app)
+    cache.init_app(app)
     configure_uploads(app, uploaded_images)
 
 #   注册蓝本
