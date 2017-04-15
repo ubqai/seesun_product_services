@@ -20,7 +20,7 @@ def create_app(config_name):
     cache.init_app(app)
     configure_uploads(app, uploaded_images)
 
-#   注册蓝本
+#   register_blueprint
     from .main import main as main_blueprint
     from .api import api as api_blueprint
     app.register_blueprint(main_blueprint)
