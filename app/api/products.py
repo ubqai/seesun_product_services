@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from .. import db
+from .. import db, cache
 from ..models import ProductCategory, Product, SkuOption
 from . import api
 from .errors import bad_request
@@ -104,6 +104,7 @@ def update_product(id):
             product.sku_options.append(sku_option)
     db.session.add(product)
     db.session.commit()
+    cache.delete_memoized(get_product_options, id)
     response = jsonify(
         {
             'status': "success",
@@ -120,6 +121,7 @@ def delete_product(id):
     product = Product.query.get_or_404(id)
     db.session.delete(product)
     db.session.commit()
+    cache.delete_memoized(get_product_options, id)
     response = jsonify(
         {
             'status': "success"
@@ -131,6 +133,7 @@ def delete_product(id):
 
 # 获取产品的属性
 @api.route("/product/<int:id>/options", methods=["GET"])
+@cache.memoize(72000)
 def get_product_options(id):
     response = jsonify(
         Product.query.get_or_404(id).to_option_json()
