@@ -3,6 +3,7 @@ from .. import db
 from ..models import ProductSku, Inventory
 from . import api
 from .errors import bad_request
+from sqlalchemy import or_
 
 
 # 创建库存
@@ -133,3 +134,21 @@ def get_inventory(id):
     )
     response.status_code = 200
     return response
+
+
+# 根据sku id和user_id 获取 库存
+@api.route("/sku/users_inventories", methods=["POST"])
+def get_users_inventories():
+    inv_type = request.json.get('inv_type')
+    user_ids = request.json.get('user_ids')
+    current_app.logger.info(user_ids)
+    response = jsonify(
+        [{"sku": sku.to_search_json(), "invs": [{"user_id": user[0], "user_name": user[1], "total": user[2], "batches":
+            [inv.to_json() for inv in Inventory.query.filter_by(user_id=user[0], user_name=user[1],
+                                                                product_sku_id=sku.id, type=inv_type)]}
+         for user in sku.inv_group_by_users(user_ids)]} for sku in ProductSku.query.filter(
+            or_(ProductSku.isvalid == "YES", ProductSku.isvalid == None)).all()]
+    )
+    response.status_code = 200
+    return response
+

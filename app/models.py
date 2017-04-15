@@ -237,6 +237,13 @@ class ProductSku(db.Model):
                 group_by(Inventory.user_id, Inventory.user_name).all()
         return inv_users_list
 
+    def inv_group_by_users(self, user_ids):
+        inv_users_list = db.session.query(Inventory.user_id, Inventory.user_name,
+                                          db.func.sum(Inventory.stocks).label('total')). \
+            filter_by(product_sku_id=self.id).filter(Inventory.user_id.in_(user_ids)).\
+            group_by(Inventory.user_id, Inventory.user_name).all()
+        return inv_users_list
+
 
 class Inventory(db.Model):
     __tablename__ = 'inventories'
