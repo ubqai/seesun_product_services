@@ -67,20 +67,6 @@ def get_inventories_by_code(code):
     return response
 
 
-# 根据sku id和user_id 获取 库存
-@api.route("/sku/<int:user_id>/<int:id>/<inv_type>/inventories", methods=["GET"])
-def get_user_inventories(user_id, id, inv_type=2):
-    sku = ProductSku.query.get_or_404(id)
-    response = jsonify(
-        [{"user_id": user[0], "user_name": user[1], "total": user[2], "batches":
-            [inv.to_json() for inv in Inventory.query.filter_by(user_id=user[0], user_name=user[1],
-                                                                product_sku_id=sku.id, type=inv_type)]}
-         for user in sku.inv_group_by_user(user_id=user_id)]
-    )
-    response.status_code = 200
-    return response
-
-
 # 修改库存
 @api.route("/inventories/<int:id>/edit", methods=["PUT"])
 def update_inv(id):
@@ -136,18 +122,24 @@ def get_inventory(id):
     return response
 
 
-# 根据user_id 获取 库存
+# 根据sku_id和user_id 获取 库存
 @api.route("/sku/users_inventories", methods=["POST"])
 def get_users_inventories():
     inv_type = request.json.get('inv_type')
-    user_ids = request.json.get('user_ids')
+    user_ids = request.json.get('user_ids', [])
+    sku_ids = request.json.get('sku_ids', [])
     current_app.logger.info(user_ids)
 
+    query = db.session.query(Inventory).join(Inventory.product_sku).filter(
+        or_(ProductSku.isvalid == "YES", ProductSku.isvalid == None)).filter(Inventory.stocks > 0)
+    if inv_type is not None:
+        query = query.filter(Inventory.type == inv_type)
+    if len(user_ids) > 0:
+        query = query.filter(Inventory.user_id.in_(user_ids))
+    if len(sku_ids) > 0:
+        query = query.filter(ProductSku.id.in_(sku_ids))
     response = jsonify(
-        [{"sku": inv.product_sku.to_search_json(), "inv": inv.to_json()} for inv in
-         db.session.query(Inventory).join(Inventory.product_sku).filter(
-             or_(ProductSku.isvalid == "YES", ProductSku.isvalid == None)).filter(
-             Inventory.user_id.in_(user_ids), Inventory.stocks > 0, Inventory.type == inv_type)]
+        [{"sku": inv.product_sku.to_search_json(), "inv": inv.to_json()} for inv in query.all()]
     )
     response.status_code = 200
     return response
