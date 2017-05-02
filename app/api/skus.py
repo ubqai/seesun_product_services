@@ -95,7 +95,7 @@ def update_sku(id):
             raise ValidationError("%s isvalid enum must be YES or NO" % request.json.get('isvalid'), 400)
         sku.isvalid = request.json.get('isvalid')
     if request.json.get('stocks_for_order') is not None:
-        sku.stocks_for_order += int(request.json.get('stocks_for_order'))
+        sku.stocks_for_order += float(request.json.get('stocks_for_order'))
     if isinstance(request.json.get('options_id'), list):
         for sku_option in sku.sku_options.all():
             sku.sku_options.remove(sku_option)
@@ -126,12 +126,12 @@ def update_sku_by_code():
         code = sku_info.get("code")
         sku = ProductSku.query.filter_by(code=code).first()
         if sku_info.get('stocks_for_order') is not None:
-            sku.stocks_for_order += int(sku_info.get('stocks_for_order'))
+            sku.stocks_for_order += float(sku_info.get('stocks_for_order'))
 
         if isinstance(sku_info.get('batches'), list):
             for batch in sku_info.get('batches'):
                 inv = Inventory.query.get_or_404(batch['inv_id'])
-                inv.stocks -= int(batch['sub_stocks'])
+                inv.stocks -= float(batch['sub_stocks'])
                 db.session.add(inv)
         db.session.add(sku)
     db.session.commit()
