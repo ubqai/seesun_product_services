@@ -177,10 +177,13 @@ def search_skus():
         return bad_request("option_ids params is necessary")
     if not isinstance(request.json.get('option_ids'), list):
         return bad_request("option_ids params must be a list")
-
+    sku_code = request.json.get('sku_code', '')
     bq = db.session.query(ProductSku)
+    if request.json.get('sku_code') is not None:
+        bq = bq.filter(ProductSku.code.like("%" + sku_code + "%"))
     for option_id in request.json.get('option_ids'):
         bq = bq.from_self().join(ProductSku.sku_options).filter(SkuOption.id == option_id)
+
     total_count = bq.count()
     page_size = int(request.json.get('page_size', '20'))
     page_index = int(request.json.get('page', '1'))
